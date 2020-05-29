@@ -234,21 +234,21 @@ void MinRing :: displayCompasBig(uint8_t hue){
 }
 
 void MinRing :: displayCompas(uint8_t hue){
-  setHSV(57, hue, 200, 80);
-  setHSV(58, hue, 250, 200);
   setHSV(59, hue, 200, 80);
+  setHSV(0, hue, 250, 200);
+  setHSV(1, hue, 200, 80);
 
-  setHSV(12, hue, 200, 80);
-  setHSV(13, hue, 250, 200);
   setHSV(14, hue, 200, 80);
+  setHSV(15, hue, 250, 200);
+  setHSV(16, hue, 200, 80);
 
-  setHSV(27, hue, 200, 80);
-  setHSV(28, hue, 250, 200);
   setHSV(29, hue, 200, 80);
+  setHSV(30, hue, 250, 200);
+  setHSV(31, hue, 200, 80);
 
-  setHSV(42, hue, 200, 80);
-  setHSV(43, hue, 250, 200);
   setHSV(44, hue, 200, 80);
+  setHSV(45, hue, 250, 200);
+  setHSV(46, hue, 200, 80);
 }
 
 

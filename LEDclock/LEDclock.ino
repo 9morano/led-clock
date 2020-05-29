@@ -413,7 +413,7 @@ void CLOCK_DisplayTime(int tip, int val, int btn){
 		}
 	}
 
-	// For testing purpose
+	// For testing purpose TODO delete
 	#if DEBUG
 		if((t.sec == 5) || (t.sec == 35)){
 
