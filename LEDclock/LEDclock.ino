@@ -1,4 +1,5 @@
-/* LED CLOCK
+/* --------------------------------------------------------------------------------------------------
+ * LED CLOCK
  * Program for controling clock - 2 rings with addressable led strips
  * 
  * Ver.:  8.0
@@ -22,22 +23,24 @@
  * 			TYPE 2: Set color of the clock
  * 
  * - MODE 3: Some colors with LED-S
- * 			TYPE 1: Rainbow circuling arround - user can change its speed with pot.
+ * 			TYPE 1: Rainbow circling around - user can change its speed with pot.
  * 			TYPE 2: Sinelon back and forward - user can change its color with pot.
  * 			TYPE 3: Chasing dots - user can just observe dots chasing each other.
  * 			TYPE 4: Fireworks - user must observe all 3 rockets - it can't be changed, but it will
  * 					automatically shifted back to rainbow (type 1) after 3 rockets.
  * 
- * - MODE 4: Termometter 
+ * - MODE 4: Thermometer 
  * 
- * If both buttons are pressed at the same time, user can change (adjust) the time of the clock
+ * If both buttons are pressed at the same time, user can change the time of the clock
  * If both buttons are pressed before startup, clock will go in the mantainance mode - it will display
- * compas (for mounting purpusoe) and later all effect between hours (demonstration purpose)
- */
+ * compas (for mounting purpose) and later all effect between hours (demonstration purpose)
+ *-----------------------------------------------------------------------------------------------------*/
+
+
 
 // TODO: testjrej BD show zdej ku si spremenu ku nej vč for zanke...tudi mantainance mode je zdej drgačn
 
-
+/* ----------------------------------------------------------------------------------------------------*/
 #include <FastLED.h>
 #include "DS3231.h"
 #include "ring.h"
@@ -54,8 +57,9 @@
 #else
 	#define LOG_INFO(s, x)
 #endif
-
-/*---------------DEFINES-----------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- DEFINES -----------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
 #define BTN1_PIN 7
 #define BTN2_PIN 9
 
@@ -65,15 +69,27 @@
 
 #define START_BRIGHTNESS 100
 
-/*---------------GLOBAL VARIABLES----------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+/*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+
+// DS3231 clock module library declaration
+DS3231  Clock;
+
+// FastLED strip declarations
 CRGB HourLeds[NUM_LED_HOUR];
 CRGB MinLeds[NUM_LED_MIN];
 
-// Mode variable
+// Ring class defines
+MinRing  mRing;
+HourRing hRing;
+
+
+// Variable for clock modes
 int mode = 2;
 int mode_num = 4;
 
-// Different types of same mode
+// Variable for different types of same mode
 int type = 1;
 int type_num = 4;
 
@@ -93,19 +109,14 @@ int btn1 = 1;
 int btn2 = 1;
 unsigned long btn1_debounce_time;
 unsigned long btn2_debounce_time;
-int debounce_delay = 50;  //50 milli seconds delay
+int debounce_delay = 50;
 
-// Variable - user color of the clock
+// Variable for color of the clock
 user_color clock_color;
 
-// Rings
-MinRing  mRing;
-HourRing hRing;
-
-// Clock variable
-DS3231  Clock;    //A4 an A5 on Arduino Nano
-
-/*---------------FUNCTION DECLARATIONS---------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- FUNCTION DECLARATIONS ---------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_FadeToBlack			(void);
 void CLOCK_SetBrightness		(void);
 
@@ -118,26 +129,33 @@ void CLOCK_DisplayHalfHour		(int val);
 void CLOCK_DisplayQuarter		(int val, myTime t);
 void CLOCK_DisplayTriQuarter	(int val, myTime t);
 void CLOCK_DisplayFirework		(void);
-void CLOCK_SetTime				(void);
 
+void CLOCK_SetTime				(void);
 void CLOCK_MaintainanceMode		(void);
 
-/*---------------SETUP-----------------------------------------------------------------------------*/
+
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- SETUP -------------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
 void setup() {
 	delay(100);
 
-	Serial.begin(115200);
+	// Initialize serial connection - debugging purposes  
+	Serial.begin(115200);	// TODO dodej v #ifdef #endif
 
 	Serial.println("Debugging state: %d", DEBUG);
 
+	// Initialize GPIO pins for buttons
 	pinMode(BTN1_PIN, INPUT_PULLUP);
 	pinMode(BTN2_PIN, INPUT_PULLUP);
 
-	FastLED.setBrightness(START_BRIGHTNESS);
-
+	// Begin with I2C connection (for DS3231 module)
 	Wire.begin();
+
+	// Configure clock module
 	Clock.setClockMode(false);  // set to 24h
 
+	// TODO 
 	Clock.setYear(2020);
 	Clock.setMonth(3);
 	Clock.setDate(8);
@@ -145,22 +163,27 @@ void setup() {
 	Clock.setMinute(20);
 	Clock.setSecond(0);
 
+	// Set initial values of the user clock color
 	clock_color.compas = 255;
 	clock_color.hour_color = 200;
 	clock_color.min_color = 200;
 
-	// If both BTN are pressed, go to maintainance mode
+	// If both BTN are pressed durring startup, go to maintainance mode
 	if(!digitalRead(BTN1_PIN) && !digitalRead(BTN2_PIN))
 	{
 		CLOCK_MaintainanceMode();
 	}  
+
+	FastLED.setBrightness(START_BRIGHTNESS);
 }
 
-/*---------------MAIN LOOP--------------------------------------------------------------------------*/
 
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- MAIN LOOP ---------------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
 void loop() {
 
-	/*---------BUTTON STATE CHECK---------------------------------------------*/
+	/*---------BUTTON STATE CHECK------------------------------*/
 	uint8_t btn1_read = digitalRead(BTN1_PIN);
 	uint8_t btn2_read = digitalRead(BTN2_PIN);
 
@@ -225,7 +248,7 @@ void loop() {
 	btn1_last_state = btn1_read;
 	btn2_last_state = btn2_read;
 
-	/*---------GET POTENTIOMETER VALUE------------------------------------------------*/
+	/*---------GET POTENTIOMETER VALUE------------------------------*/
 	// Average reading of 5 pot values, because pot varies up/down
 
 	potVal[cnt] = analogRead(POT_PIN);
@@ -244,7 +267,7 @@ void loop() {
   
 	//LOG_INFO(Pot value:, aVal);
 
-	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR-------------------------------*/
+	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
 	photo = analogRead(PHOTO_PIN);
 
 	/*
@@ -267,7 +290,7 @@ void loop() {
 	}
 	*/
 
-	/*---------DISPLAY LEDS IN GIVEN MODE---------------------------------------------*/
+	/*---------DISPLAY LEDS IN GIVEN MODE-------------------------------*/
 	switch(mode){
 		case 0:
 			CLOCK_DisplayTime(0, aVal, type);
@@ -293,7 +316,11 @@ void loop() {
 	FastLED.show();
 }
 
-/*---------------CLOCK FUNCTIONS---------------------------------------------------------------*/
+
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- FUNCTION DEFINITIONS ----------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+
 
 // Slowly fade away
 void CLOCK_FadeToBlack(void)
@@ -314,6 +341,8 @@ void CLOCK_FadeToBlack(void)
 	hRing.setBlack();
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 // TIP 0: User colors - without seconds
 // TIP 1: Variable colors -  with seconds
 // TIP 2: Predefined colors - with smooth seconds
@@ -422,8 +451,7 @@ void CLOCK_DisplayTime(int tip, int val, int btn){
 }
 
 
-
-
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayFullHour(int val)
 {
 	CLOCK_FadeToBlack();
@@ -431,6 +459,7 @@ void CLOCK_DisplayFullHour(int val)
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayQuarter(int val, myTime t)
 {
 	int start_px_hour = (t.hour%12);
@@ -462,6 +491,8 @@ void CLOCK_DisplayQuarter(int val, myTime t)
 	mRing.colorWipe(-1, 30, start_px_min);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayHalfHour(int val)
 {
 	//CLOCK_FadeToBlack() but keep half hour compas
@@ -483,6 +514,8 @@ void CLOCK_DisplayHalfHour(int val)
 	CLOCK_FadeToBlack();  
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayTriQuarter(int val, myTime t)
 {	
 	int start_px_hour = (t.hour%12);
@@ -503,6 +536,7 @@ void CLOCK_DisplayTriQuarter(int val, myTime t)
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayLamp(int tip, int val){
 	static int rainbow_val = 0;
 	static int rainbow_count = 0;
@@ -582,6 +616,7 @@ void CLOCK_DisplayLamp(int tip, int val){
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayTemperature(void){
   int temp = Clock.getTemperature();
 
@@ -652,6 +687,7 @@ void CLOCK_DisplayTemperature(void){
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_SetTime(void){
 	int pot_hour = 0;
 	int hour_pos;
@@ -719,7 +755,7 @@ void CLOCK_SetTime(void){
 }
 
 
-
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayFirework(void)
 {
 	CLOCK_FadeToBlack();  
@@ -851,6 +887,7 @@ void CLOCK_DisplayFirework(void)
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_MaintainanceMode(void){
 	 // For displaying position / orientation
 	mRing.setBlack();
