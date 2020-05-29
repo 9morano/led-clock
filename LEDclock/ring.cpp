@@ -1,7 +1,10 @@
 #include "ring.h"
 
 
-/*---------------HOUR RING FUNCTIONS-----------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- HOUR RING CLASS ---------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
+
 //Hour Ring constructor (init)
 HourRing :: HourRing(){
   //Serial.println("INIT Minute Led Strip");
@@ -10,12 +13,16 @@ HourRing :: HourRing(){
   px_hou = 0;
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: updateClockPosition(myTime t){
   int tmp = 0;
   tmp = t.hour % 12; //from 24h format to 12h
   px_hou = tmp;
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: displayCompasBig(uint8_t hue){
   setHSV(0, hue, 200, 200);
   setHSV(1, hue, 200, 200);
@@ -30,6 +37,8 @@ void HourRing :: displayCompasBig(uint8_t hue){
   setHSV(19, hue, 200, 200);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: displayCompas(uint8_t hue){
   setHSV(0, hue, 250, 200);
   setHSV(1, hue, 250, 200);
@@ -44,6 +53,8 @@ void HourRing :: displayCompas(uint8_t hue){
   setHSV(19, hue, 250, 200);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing::displayClockVariableColor(int color){
   setBlack();
 
@@ -54,6 +65,8 @@ void HourRing::displayClockVariableColor(int color){
   setHSV((px_hou*2)+1, (color - 40), 255, 250);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: displayClockPredefinedColor(int fact){
   nscale8(HourLeds,NUM_LED_HOUR,253); 
   
@@ -99,6 +112,8 @@ void HourRing :: displayClockPredefinedColor(int fact){
   }
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: displayClockUserColor(user_color uc)
 {
   setBlack();
@@ -110,28 +125,39 @@ void HourRing :: displayClockUserColor(user_color uc)
   setHSV((px_hou*2)+1, uc.hour_color, 255, 250);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to black - off
 void HourRing :: setBlack(void){
   for(int i=0; i<NUM_LED_HOUR; i++){
     HourLeds[i] = CRGB :: Black;
   }
 }
+
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: setWhite(void){
   for(int i=0; i<NUM_LED_HOUR; i++){
     HourLeds[i] = CRGB :: White;
   }
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in RGB order
 void HourRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b){
   HourLeds[pixel].setRGB(r, g, b);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in HSV order
 void HourRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v){
   HourLeds[pixel].setHSV(h, s, v);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to same color in HSV order
 void HourRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v){
   
@@ -140,6 +166,8 @@ void HourRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v){
   }
  }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //All leds assamble a rainbow - variable says with which colour
 //to start the rainbow
 void HourRing :: rainbow(uint8_t start_hue){
@@ -148,9 +176,11 @@ void HourRing :: rainbow(uint8_t start_hue){
   //fill_rainbow(HourLeds, NUM_LED_HOUR, start_hue, 4);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: colorWipe(int hue, int wait, int start_px){
 
-//TO DO: popravi tle pozicijo - start_px je prau, sam uro dej x2
+//TODO: popravi tle pozicijo - start_px je prau, sam uro dej x2
   
   if(hue == -1){
     for (int i=(start_px*2); i<NUM_LED_HOUR; i++){
@@ -182,13 +212,10 @@ void HourRing :: colorWipe(int hue, int wait, int start_px){
 
 
 
+/* ----------------------------------------------------------------------------------------------------*/
+/*--------------- MIN RING CLASS ----------------------------------------------------------------------*/
+/* ----------------------------------------------------------------------------------------------------*/
 
-
-
-
-
-
-/*---------------MINUTE RING FUNCTIONS---------------------------------------------------------------*/
 //Minute Ring constructor (init)
 MinRing :: MinRing(){
   //Serial.println("INIT Minute Led Strip");
@@ -198,11 +225,15 @@ MinRing :: MinRing(){
   px_sec = 0;
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: updateClockPosition(myTime t){
   px_sec = t.sec;
   px_min = t.min;
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayCompasBig(uint8_t hue){
   setHSV(59, hue, 120, 60);
   setHSV(0, hue, 200, 200);
@@ -233,6 +264,8 @@ void MinRing :: displayCompasBig(uint8_t hue){
   setHSV(55, hue, 120, 60);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayCompas(uint8_t hue){
   setHSV(59, hue, 200, 80);
   setHSV(0, hue, 250, 200);
@@ -252,6 +285,7 @@ void MinRing :: displayCompas(uint8_t hue){
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayClockVariableColor(int color){
   //set all leds to black colour
   nscale8(MinLeds,NUM_LED_MIN,200); 
@@ -263,6 +297,8 @@ void MinRing :: displayClockVariableColor(int color){
   setHSV(px_sec, (color + 40), 255, 250);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayClockPredefinedColor(int fact){
 
   nscale8(MinLeds,NUM_LED_MIN,253); 
@@ -314,6 +350,8 @@ void MinRing :: displayClockPredefinedColor(int fact){
   }
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayClockUserColor(user_color uc)
 {
   //set all leds to black colour
@@ -327,7 +365,7 @@ void MinRing :: displayClockUserColor(user_color uc)
 }
 
 
-
+/* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to black - off
 void MinRing :: setBlack(void)
 {
@@ -335,6 +373,9 @@ void MinRing :: setBlack(void)
     MinLeds[i] = CRGB :: Black;
   }
 }
+
+
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: setWhite(void)
 {
   for(int i=0; i<NUM_LED_MIN; i++){
@@ -342,18 +383,24 @@ void MinRing :: setWhite(void)
   }
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in RGB order
 void MinRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b)
 {
   MinLeds[pixel].setRGB(r, g, b);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in HSV order
 void MinRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v)
 {
   MinLeds[pixel].setHSV(h, s, v);
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to same color in HSV order
 void MinRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v)
 {
@@ -362,6 +409,8 @@ void MinRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v)
   }
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 //All leds assamble a rainbow - variable says with which colour to start the rainbow
 void MinRing :: rainbow(uint8_t start_hue)
 {
@@ -371,8 +420,7 @@ void MinRing :: rainbow(uint8_t start_hue)
 }
 
 
-
-
+/* ----------------------------------------------------------------------------------------------------*/
 //Rainbow circuling around the ring - variable says how quick
 void MinRing :: rainbowCycle(int delay_time)
 {
@@ -383,6 +431,8 @@ void MinRing :: rainbowCycle(int delay_time)
 	}
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 // Set all leds into shifted color one by one - wipe
 void MinRing :: colorWipe(int hue, int wait, int start_px)
 {	
@@ -422,6 +472,8 @@ void MinRing :: colorWipe(int hue, int wait, int start_px)
 	}
 }
 
+
+/* ----------------------------------------------------------------------------------------------------*/
 // Wipe leds but with 4 beginings together 
 void MinRing :: quarterWipe(int hue, int wait)
 {
@@ -455,6 +507,7 @@ void MinRing :: quarterWipe(int hue, int wait)
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 // Rainbow dots are falling from both sides
 void MinRing :: rainbowFaling (int hue)
 {
@@ -497,6 +550,7 @@ void MinRing :: rainbowFaling (int hue)
 }
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 //Pixels start to assamble a rainbow -faling down and filling the ring
 //variable sets the starting pixel - from where to fall 
 void MinRing :: rainbowFillin(uint8_t start_hue)
@@ -549,9 +603,8 @@ void MinRing :: rainbowFillin(uint8_t start_hue)
 
 
 
+/* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: birthDayShow(uint8_t hue)
 {
 	//setHSV(35)
 }
-
-  
