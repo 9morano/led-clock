@@ -88,12 +88,12 @@ HourRing hRing;
 
 
 // Variable for clock modes
-uint8_t mode = 0;
-uint8_t mode_num = 4;
+uint8_t clock_mode = 0;
+uint8_t num_of_modes = 4;		// TODO move to define
 
 // Variable for different types of same mode
-uint8_t type = 1;
-uint8_t type_num = 4;
+uint8_t clock_type = 1;
+uint8_t num_of_types = 4;
 
 // Value of photo resistor
 int photo = 1023;
@@ -107,8 +107,8 @@ user_color clock_color;
 void CLOCK_FadeToBlack			(void);
 void CLOCK_SetBrightness		(void);
 
-void CLOCK_DisplayTime			(int tip, int val, int btn);
-void CLOCK_DisplayLamp			(int tip, int val);
+void CLOCK_DisplayTime			(uint8_t mode, uint8_t val, uint8_t type);
+void CLOCK_DisplayLamp			(uint8_t val, uint8_t type);
 void CLOCK_DisplayTemperature	(void);
 
 void CLOCK_DisplayFullHour		(int val);
@@ -216,13 +216,13 @@ void loop() {
 				}
 				else{
 					//change mode in circular order
-					mode++;
-					if(mode >= mode_num){
-						mode = 0;
+					clock_mode ++;
+					if(clock_mode >= num_of_modes){
+						clock_mode = 0;
 					}
-					type = 0; //reset type counter so it allways starts from begining
+					clock_type = 0; //reset type counter so it allways starts from begining
 
-					SERIAL_DEBUG(Mode:, mode);
+					SERIAL_DEBUG(Mode:, clock_mode);
 				}   
 			}
 		}
@@ -241,11 +241,11 @@ void loop() {
 				}
 				else{
 					//change type in circular order
-					type++;
-					if(type >= type_num){
-						type = 0;
+					clock_type ++;
+					if(clock_type >= num_of_types){
+						clock_type = 0;
 					}
-					SERIAL_DEBUG(Type:, type);
+					SERIAL_DEBUG(Type:, clock_type);
 				}        
 			}
 		}  
@@ -295,17 +295,17 @@ void loop() {
 	*/
 
 	/*---------DISPLAY LEDS IN GIVEN MODE-------------------------------*/
-	switch(mode){
+	switch(clock_mode){
 		case 0:
-			CLOCK_DisplayTime(0, analog_val, type);
+			CLOCK_DisplayTime(0, analog_val, clock_type);
 			break;
 
 		case 1:
-			CLOCK_DisplayTime(1, analog_val, type);
+			CLOCK_DisplayTime(1, analog_val, clock_type);
 			break;
 
 		case 2:
-			CLOCK_DisplayLamp(type, analog_val);
+			CLOCK_DisplayLamp(analog_val, clock_type);
 			break;  
 
 		case 3:
@@ -313,7 +313,7 @@ void loop() {
 			break;
 
 		default:
-			CLOCK_DisplayLamp(type, analog_val);
+			CLOCK_DisplayLamp(analog_val, clock_type);
 			break;  
 	}  
 
@@ -347,76 +347,114 @@ void CLOCK_FadeToBlack(void)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-// TIP 0: User colors - without seconds
-// TIP 1: Variable colors -  with seconds
-// TIP 2: Predefined colors - with smooth seconds
-void CLOCK_DisplayTime(int tip, int val, int btn){
+// MODE 0: User colors - without seconds
+// MODE 1: Variable colors -  with seconds
+// MODE 2: Predefined colors - with smooth seconds
+void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 
-	static int val_color = 0;
-	static int val_bright = START_BRIGHTNESS;
+	static int color = 0;
+	static int brightness = START_BRIGHTNESS;
 	bool h12 = false;
-
 	myTime t;
+
+	// Get precise time from DS3231 module
 	t.hour = Clock.getHour(h12,h12);
 	t.min = Clock.getMinute();
 	t.sec = Clock.getSecond();
+
+	// SERIAL_DEBUG("Time is:", t.hour);
 
 	// Update position of clock pixels
 	hRing.updateClockPosition(t);
 	mRing.updateClockPosition(t);
 
-	switch(tip){
+	switch(mode){
 		case 0:
-			if(btn == 0)
-			{
-				val_bright = val;
-			} 
-			else if(btn == 1)
-			{
-				clock_color.compas = val;
-			} 
-			else if(btn == 2)
-			{
-				clock_color.min_color = val;
-			}
-			else if(btn == 3)
-			{
-				clock_color.hour_color = val;
-			}
-			FastLED.setBrightness(val_bright);
 
+			// Get user colors - depending on type button (BTN2)
+			switch(type){
+				case 0:
+					brightness = val;
+					break;
+
+				case 1:
+					clock_color.compas = val;
+					break;
+
+				case 2:
+					clock_color.min_color = val;
+					break;
+				
+				case 3:
+					clock_color.hour_color = val;
+					break;
+
+				default:
+					break;
+			}
+
+			// Prepare colors for clock
 			mRing.displayClockUserColor(clock_color);
 			hRing.displayClockUserColor(clock_color);
-			break;
 
-		case 2:
-			//toggle between Color and Brightness settings - depends on BTN2
-			if(btn%2 == 0){
-				val_bright = val;
-			} else{
-				val_color = val;
-			}
-			FastLED.setBrightness(val_bright);
-
-			mRing.displayClockVariableColor(val_color);
-			hRing.displayClockVariableColor(val_color);
+			// Adjust brightness
+			FastLED.setBrightness(brightness);
 			break;
 			
 		case 1:
-			//toggle between Color and Brightness settings - depends on BTN2
-			if(btn%2 == 0){
-				val_bright = val;
-			} else{
-				val_color = val;
+			// Toggle between Color and Brightness settings - depends on BTN2
+			switch(type){
+				case 0:
+				case 2:
+					brightness = val;
+					break;
+				
+				case 1:
+				case 3:
+					color = val;
+					break;
+				
+				default:
+					break;
 			}
-			FastLED.setBrightness(val_bright);
 
-			mRing.displayClockPredefinedColor(val_color);
-			hRing.displayClockPredefinedColor(val_color);
+			// Prepare colors for clock
+			mRing.displayClockPredefinedColor(color);
+			hRing.displayClockPredefinedColor(color);
+			
+			// Adjust brightness
+			FastLED.setBrightness(brightness);
+			break;
+
+		case 2:
+			// Toggle between Color and Brightness settings - depends on BTN2
+			switch(type){
+				case 0:
+				case 2:
+					brightness = val;
+					break;
+				
+				case 1:
+				case 3:
+					color = val;
+					break;
+				
+				default:
+					break;
+			}
+
+			// Prepare colors
+			mRing.displayClockVariableColor(color);
+			hRing.displayClockVariableColor(color);
+
+			// Adjust brightness
+			FastLED.setBrightness(brightness);
 			break;
 	}
 
 
+	// TODO get pixel color, and give that as variable to functions call
+	
 	// Disable special effects durring night
 	// So it doesn't wake up whole neighbour-hood 
 	if(photo > 100 && (t.hour > 8 && t.hour < 23))
@@ -424,7 +462,7 @@ void CLOCK_DisplayTime(int tip, int val, int btn){
 		// Every 15min display one fo the effects
 		if((t.min == 0) && (t.sec == 5))
 		{
-			CLOCK_DisplayFullHour(val_color);
+			CLOCK_DisplayFullHour(color);
 		}
 		else if((t.min == 15) && (t.sec == 5))
 		{
@@ -432,11 +470,11 @@ void CLOCK_DisplayTime(int tip, int val, int btn){
 		}
 		else if((t.min == 30) && (t.sec == 5))
 		{
-			CLOCK_DisplayHalfHour(val_color);
+			CLOCK_DisplayHalfHour(color);
 		}
 		else if((t.min == 45) && (t.sec == 5))
 		{
-			CLOCK_DisplayTriQuarter(val_color, t);
+			CLOCK_DisplayTriQuarter(color, t);
 		}
 		else if((t.hour == 13) && (t.min == 20) && (t.sec == 5))
 		{	
@@ -446,7 +484,7 @@ void CLOCK_DisplayTime(int tip, int val, int btn){
 		}
 	}
 
-	// For testing purpose TODO delete
+	// For testing purpose
 	#if DEBUG
 		if((t.sec == 5) || (t.sec == 35)){
 
@@ -541,7 +579,7 @@ void CLOCK_DisplayTriQuarter(int val, myTime t)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_DisplayLamp(int tip, int val){
+void CLOCK_DisplayLamp(uint8_t val, uint8_t type){
 	static int rainbow_val = 0;
 	static int rainbow_count = 0;
 
@@ -550,7 +588,7 @@ void CLOCK_DisplayLamp(int tip, int val){
 
 	byte dothue = 0;
 
-	switch(tip){
+	switch(type){
 		// Rainbow cycling in a circle 
 		case 0:
 			mRing.rainbow(rainbow_val);
@@ -600,7 +638,8 @@ void CLOCK_DisplayLamp(int tip, int val){
 		// Firework (one time)
 		case 3:
 			CLOCK_DisplayFirework();
-			type = 0;
+			// After firework, go back to rainbow
+			clock_type = 0;
 			FastLED.delay(100);
 			break;	
 			
