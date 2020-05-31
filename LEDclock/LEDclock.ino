@@ -88,30 +88,15 @@ HourRing hRing;
 
 
 // Variable for clock modes
-int mode = 0;
-int mode_num = 4;
+uint8_t mode = 0;
+uint8_t mode_num = 4;
 
 // Variable for different types of same mode
-int type = 1;
-int type_num = 4;
-
-// Value of potenciometer
-int aVal = 0;
-int avgVal = 0;
-int potVal[5];
-int cnt = 0;
+uint8_t type = 1;
+uint8_t type_num = 4;
 
 // Value of photo resistor
 int photo = 1023;
-
-// Buttons variables
-int btn1_last_state = 1;
-int btn2_last_state = 1;
-int btn1 = 1;
-int btn2 = 1;
-unsigned long btn1_debounce_time;
-unsigned long btn2_debounce_time;
-int debounce_delay = 50;
 
 // Variable for color of the clock
 user_color clock_color;
@@ -146,8 +131,7 @@ void setup() {
 	// Initialize serial connection - debugging purposes  
 	Serial.begin(115200);
 
-	Serial.print("Debugging state: ");
-	Serial.println(DEBUG);
+	Serial.println("Debugging state is on!");
 #endif
 
 	// Initialize GPIO pins for buttons
@@ -186,6 +170,23 @@ void setup() {
 /*--------------- MAIN LOOP ---------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
 void loop() {
+
+	/*---------VARIABLE DECLARATION ----------------------------*/
+	// Potentiometer variables
+	static int pot_val[5];
+	static uint8_t pot_count = 0;
+	static int avg_val = 0;
+	static uint8_t analog_val = 0;
+
+	// Buttons variables
+	static uint8_t btn1_last_state = 1;
+	static uint8_t btn2_last_state = 1;
+	static uint8_t btn1 = 1;
+	static uint8_t btn2 = 1;
+	static unsigned long btn1_debounce_time;
+	static unsigned long btn2_debounce_time;
+	uint8_t debounce_delay = 50;
+
 
 	/*---------BUTTON STATE CHECK------------------------------*/
 	uint8_t btn1_read = digitalRead(PIN_BTN1);
@@ -253,23 +254,23 @@ void loop() {
 	btn2_last_state = btn2_read;
 
 	/*---------GET POTENTIOMETER VALUE------------------------------*/
-	// Average reading of 5 pot values, because pot varies up/down
+	// Average reading of 5 potentiometer values, because pot varies up/down
 
-	potVal[cnt] = analogRead(PIN_POT);
-	cnt++;
+	pot_val[pot_count] = analogRead(PIN_POT);
+	pot_count++;
 
-	if(cnt == 5){
-		avgVal = 0;
+	if(pot_count == 5){
+		avg_val = 0;
 		for (int i=0; i<5; i++){
-			avgVal = avgVal + potVal[i];
+			avg_val = avg_val + pot_val[i];
 		}
-		avgVal = avgVal/5;
-		cnt = 0;
+		avg_val = avg_val/5;
+		pot_count = 0;
 	}
 
-	aVal = map(avgVal,0,1023,0,255);
+	analog_val = map(avg_val,0,1023,0,255);
   
-	//SERIAL_DEBUG(Pot value:, aVal);
+	//SERIAL_DEBUG(Pot value:, analog_val);
 
 	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
 	photo = analogRead(PIN_PHOTO);
@@ -296,15 +297,15 @@ void loop() {
 	/*---------DISPLAY LEDS IN GIVEN MODE-------------------------------*/
 	switch(mode){
 		case 0:
-			CLOCK_DisplayTime(0, aVal, type);
+			CLOCK_DisplayTime(0, analog_val, type);
 			break;
 
 		case 1:
-			CLOCK_DisplayTime(1, aVal, type);
+			CLOCK_DisplayTime(1, analog_val, type);
 			break;
 
 		case 2:
-			CLOCK_DisplayLamp(type, aVal);
+			CLOCK_DisplayLamp(type, analog_val);
 			break;  
 
 		case 3:
@@ -312,7 +313,7 @@ void loop() {
 			break;
 
 		default:
-			CLOCK_DisplayLamp(type, aVal);
+			CLOCK_DisplayLamp(type, analog_val);
 			break;  
 	}  
 
