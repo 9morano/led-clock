@@ -111,10 +111,10 @@ void CLOCK_DisplayTime			(uint8_t mode, uint8_t val, uint8_t type);
 void CLOCK_DisplayLamp			(uint8_t val, uint8_t type);
 void CLOCK_DisplayTemperature	(void);
 
-void CLOCK_DisplayFullHour		(int val);
-void CLOCK_DisplayHalfHour		(int val);
-void CLOCK_DisplayQuarter		(int val, myTime t);
-void CLOCK_DisplayTriQuarter	(int val, myTime t);
+void CLOCK_DisplayFullHour		(uint8_t hue);
+void CLOCK_DisplayHalfHour		(uint8_t hue);
+void CLOCK_DisplayQuarter		(uint8_t hue, myTime t);
+void CLOCK_DisplayTriQuarter	(uint8_t hue, myTime t);
 void CLOCK_DisplayFirework		(void);
 
 void CLOCK_SetTime				(void);
@@ -492,15 +492,15 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_DisplayFullHour(int val)
+void CLOCK_DisplayFullHour(uint8_t hue)
 {
 	CLOCK_FadeToBlack();
-	mRing.rainbowFillin(val);
+	mRing.rainbowFillin(hue);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_DisplayQuarter(int val, myTime t)
+void CLOCK_DisplayQuarter(uint8_t hue, myTime t)
 {
 	int start_px_hour = (t.hour%12);
 	int start_px_min  = 15;
@@ -509,21 +509,21 @@ void CLOCK_DisplayQuarter(int val, myTime t)
 	for(int i=0; i<50; i++){
 		for(int j=0; j<NUM_LED_MIN; j++){
 			MinLeds[j].fadeToBlackBy(16);
-			mRing.setHSV(14, val, 250, 150);
-			mRing.setHSV(15, val, 250, 255);
-			mRing.setHSV(16, val, 250, 150);
+			mRing.setHSV(14, hue, 250, 150);
+			mRing.setHSV(15, hue, 250, 255);
+			mRing.setHSV(16, hue, 250, 150);
 		}
 		for(int k=0; k<NUM_LED_HOUR; k++){
 			HourLeds[k].fadeToBlackBy(16);
-			hRing.setHSV(start_px_hour, val, 250, 250);
-			hRing.setHSV(start_px_hour+1, val, 250, 250);
+			hRing.setHSV(start_px_hour, hue, 250, 250);
+			hRing.setHSV(start_px_hour+1, hue, 250, 250);
 		}
 		FastLED.delay(10);
 	}
 
 
-	mRing.colorWipe(val, 40, start_px_min);
-	hRing.colorWipe(val, 40, start_px_hour);
+	mRing.colorWipe(hue, 40, start_px_min);
+	hRing.colorWipe(hue, 40, start_px_hour);
 
 	FastLED.delay(300);
 
@@ -533,16 +533,16 @@ void CLOCK_DisplayQuarter(int val, myTime t)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_DisplayHalfHour(int val)
+void CLOCK_DisplayHalfHour(uint8_t hue)
 {
 	//CLOCK_FadeToBlack() but keep half hour compas
 	for(int i=0; i<50; i++){
 		for(int j=0; j<NUM_LED_MIN; j++){
 			MinLeds[j].fadeToBlackBy(16);
 
-			mRing.setHSV(31, val, 255, 250);
-			mRing.setHSV(30, val-9, 255, 250);
-			mRing.setHSV(29, val, 255, 250);
+			mRing.setHSV(31, hue, 255, 250);
+			mRing.setHSV(30, hue-9, 255, 250);
+			mRing.setHSV(29, hue, 255, 250);
 		}
 		for(int k=0; k<NUM_LED_HOUR; k++){
 			HourLeds[k].fadeToBlackBy(16);
@@ -550,25 +550,25 @@ void CLOCK_DisplayHalfHour(int val)
 	FastLED.delay(10);
 	}
 
-	mRing.rainbowFaling(val);
+	mRing.rainbowFaling(hue);
 	CLOCK_FadeToBlack();  
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_DisplayTriQuarter(int val, myTime t)
+void CLOCK_DisplayTriQuarter(uint8_t hue, myTime t)
 {	
 	int start_px_hour = (t.hour%12);
 
 	CLOCK_FadeToBlack();  
 
-	mRing.quarterWipe(val, 60);
+	mRing.quarterWipe(hue, 60);
 	FastLED.delay(50);
 	mRing.quarterWipe(-1, 60);
 
-	hRing.colorWipe(val, 40, start_px_hour);
+	hRing.colorWipe(hue, 40, start_px_hour);
 	FastLED.delay(50);
-	mRing.quarterWipe(val, 60);
+	mRing.quarterWipe(hue, 60);
 	hRing.colorWipe(-1, 30, start_px_hour);
 	mRing.quarterWipe(-1, 60);
 
@@ -659,72 +659,75 @@ void CLOCK_DisplayLamp(uint8_t val, uint8_t type){
 
 /* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_DisplayTemperature(void){
-  int temp = Clock.getTemperature();
 
-  hRing.setBlack();
-  mRing.setBlack();
+	// Get temperature from DS3213 module
+	int temp = Clock.getTemperature();
 
-  if(temp < 18){
-	fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(171,255,255), SHORTEST_HUES);
-	hRing.setAllHSV(175, 255, 255);
-  }
-  else if(temp > 26){
-	fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(0,255,255), LONGEST_HUES);
-	hRing.setAllHSV(0, 255, 255);
-	
-  }
-  else{
-	switch(temp){
-	  //blue
-	  case 18:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(169,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(171, 255, 255);
-	  break;
-	  //
-	  case 19:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(150,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(150, 255, 255);
-	  break;
-	  //
-	  case 20:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(128,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(128, 255, 255);
-	  break;
-	  //
-	  case 21:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(103,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(103, 255, 255);
-	  break;
-	  //
-	  case 22:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(80,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(80, 255, 255);
-	  break;
-	  //
-	  case 23:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(60,255,255), SHORTEST_HUES);
-		hRing.setAllHSV(60, 255, 255);
-	  break;
-	  //
-	  case 24:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(42,255,255), LONGEST_HUES);
-		hRing.setAllHSV(42, 255, 255);
-	  break;
-	  //
-	  case 25:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(20,255,255), LONGEST_HUES);
-		hRing.setAllHSV(20, 255, 255);
-	  break;
-	  //
-	  case 26:
-		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(1,255,255), LONGEST_HUES);
-		hRing.setAllHSV(1, 255, 255);
-	  break;
-	  //
-	  default:
-	  break;
+	// Set all LEDs to black
+	hRing.setBlack();
+	mRing.setBlack();
+
+	// Display temperature on minute ring
+	if(temp < 18){
+		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(171,255,255), SHORTEST_HUES);
+		hRing.setAllHSV(175, 255, 255);
 	}
-  }
+	else if(temp > 26){
+		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(0,255,255), LONGEST_HUES);
+		hRing.setAllHSV(0, 255, 255);
+
+	}
+	else{
+		switch(temp){
+			case 18:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(169,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(171, 255, 255);
+				break;
+
+			case 19:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(150,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(150, 255, 255);
+				break;
+
+			case 20:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(128,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(128, 255, 255);
+				break;
+			
+			case 21:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(103,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(103, 255, 255);
+				break;
+			
+			case 22:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(80,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(80, 255, 255);
+				break;
+			
+			case 23:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(60,255,255), SHORTEST_HUES);
+				hRing.setAllHSV(60, 255, 255);
+				break;
+			
+			case 24:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(42,255,255), LONGEST_HUES);
+				hRing.setAllHSV(42, 255, 255);
+				break;
+			
+			case 25:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(20,255,255), LONGEST_HUES);
+				hRing.setAllHSV(20, 255, 255);
+				break;
+			
+			case 26:
+				fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(1,255,255), LONGEST_HUES);
+				hRing.setAllHSV(1, 255, 255);
+				break;
+			
+			default:
+				break;
+		}
+	}
 }
 
 
