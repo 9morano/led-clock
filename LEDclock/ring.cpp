@@ -8,7 +8,7 @@
 //Hour Ring constructor (init)
 HourRing :: HourRing(){
   //Serial.println("INIT Minute Led Strip");
-  FastLED.addLeds<LED_TYPE,PIN_NUM_HOUR,COLOR_ORDER>(HourLeds, NUM_LED_HOUR).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<LED_TYPE,PIN_RING_HOUR,COLOR_ORDER>(HourLeds, NUM_LED_HOUR).setCorrection(TypicalLEDStrip);
 
   px_hou = 0;
 }
@@ -19,22 +19,6 @@ void HourRing :: updateClockPosition(myTime t){
   int tmp = 0;
   tmp = t.hour % 12; //from 24h format to 12h
   px_hou = tmp;
-}
-
-
-/* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: displayCompasBig(uint8_t hue){
-  setHSV(0, hue, 200, 200);
-  setHSV(1, hue, 200, 200);
-  
-  setHSV(6, hue, 200, 200);
-  setHSV(7, hue, 200, 200);
-  
-  setHSV(12, hue, 200, 200);
-  setHSV(13, hue, 200, 200);
-  
-  setHSV(18, hue, 200, 200);
-  setHSV(19, hue, 200, 200);
 }
 
 
@@ -119,7 +103,7 @@ void HourRing :: displayClockUserColor(user_color uc)
   setBlack();
 
   //display compas of hours
-  displayCompasBig(uc.compas);
+  displayCompas(uc.compas);
     
   setHSV(px_hou*2, uc.hour_color, 255, 250);
   setHSV((px_hou*2)+1, uc.hour_color, 255, 250);
@@ -219,7 +203,7 @@ void HourRing :: colorWipe(int hue, int wait, int start_px){
 //Minute Ring constructor (init)
 MinRing :: MinRing(){
   //Serial.println("INIT Minute Led Strip");
-  FastLED.addLeds<LED_TYPE,PIN_NUM_MIN ,COLOR_ORDER>(MinLeds,  NUM_LED_MIN ).setCorrection(TypicalLEDStrip);
+  FastLED.addLeds<LED_TYPE,PIN_RING_MIN ,COLOR_ORDER>(MinLeds,  NUM_LED_MIN ).setCorrection(TypicalLEDStrip);
 
   px_min = 0;
   px_sec = 0;

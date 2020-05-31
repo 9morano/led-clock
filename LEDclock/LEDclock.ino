@@ -2,9 +2,9 @@
  * LED CLOCK
  * Program for controling clock - 2 rings with addressable led strips
  * 
- * Ver.:  8.0
+ * Ver.:  8.1
  * Auth.: Grega Morano
- * Date.: 29.4.2020
+ * Date.: 1.6.2020
  * 
  * --------------------------------------------------------------------------------------------------
  * User can change modes of the clock with BTN 1, types with BTN 2
@@ -60,14 +60,15 @@
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- DEFINES -----------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
-#define BTN1_PIN 7
-#define BTN2_PIN 9
+#define PIN_BTN1 7
+#define PIN_BTN2 9
+#define PIN_POT A1
+#define PIN_PHOTO A0
 
-#define POT_PIN 0
+// Defined in ring.h
+//#define PIN_RING_MIN 5
+//#define PIN_RING_HOUR 3
 
-#define PHOTO_PIN 2
-
-#define START_BRIGHTNESS 100
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
@@ -86,7 +87,7 @@ HourRing hRing;
 
 
 // Variable for clock modes
-int mode = 2;
+int mode = 0;
 int mode_num = 4;
 
 // Variable for different types of same mode
@@ -143,11 +144,12 @@ void setup() {
 	// Initialize serial connection - debugging purposes  
 	Serial.begin(115200);	// TODO dodej v #ifdef #endif
 
-	Serial.println("Debugging state: %d", DEBUG);
+	Serial.print("Debugging state: ");
+	Serial.println(DEBUG);
 
 	// Initialize GPIO pins for buttons
-	pinMode(BTN1_PIN, INPUT_PULLUP);
-	pinMode(BTN2_PIN, INPUT_PULLUP);
+	pinMode(PIN_BTN1, INPUT_PULLUP);
+	pinMode(PIN_BTN2, INPUT_PULLUP);
 
 	// Begin with I2C connection (for DS3231 module)
 	Wire.begin();
@@ -155,11 +157,10 @@ void setup() {
 	// Configure clock module
 	Clock.setClockMode(false);  // set to 24h
 
-	// TODO 
 	Clock.setYear(2020);
-	Clock.setMonth(3);
-	Clock.setDate(8);
-	Clock.setHour(13);
+	Clock.setMonth(6);
+	Clock.setDate(1);
+	Clock.setHour(12);
 	Clock.setMinute(20);
 	Clock.setSecond(0);
 
@@ -169,7 +170,7 @@ void setup() {
 	clock_color.min_color = 200;
 
 	// If both BTN are pressed durring startup, go to maintainance mode
-	if(!digitalRead(BTN1_PIN) && !digitalRead(BTN2_PIN))
+	if(!digitalRead(PIN_BTN1) && !digitalRead(PIN_BTN2))
 	{
 		CLOCK_MaintainanceMode();
 	}  
@@ -184,8 +185,8 @@ void setup() {
 void loop() {
 
 	/*---------BUTTON STATE CHECK------------------------------*/
-	uint8_t btn1_read = digitalRead(BTN1_PIN);
-	uint8_t btn2_read = digitalRead(BTN2_PIN);
+	uint8_t btn1_read = digitalRead(PIN_BTN1);
+	uint8_t btn2_read = digitalRead(PIN_BTN2);
 
 	// Check how long the button is pressed to prevent debouncing
 	if(btn1_read != btn1_last_state)
@@ -251,7 +252,7 @@ void loop() {
 	/*---------GET POTENTIOMETER VALUE------------------------------*/
 	// Average reading of 5 pot values, because pot varies up/down
 
-	potVal[cnt] = analogRead(POT_PIN);
+	potVal[cnt] = analogRead(PIN_POT);
 	cnt++;
 
 	if(cnt == 5){
@@ -268,7 +269,7 @@ void loop() {
 	//LOG_INFO(Pot value:, aVal);
 
 	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
-	photo = analogRead(PHOTO_PIN);
+	photo = analogRead(PIN_PHOTO);
 
 	/*
 	Serial.println(photo);
@@ -703,8 +704,8 @@ void CLOCK_SetTime(void){
 	hRing.displayCompas(128); //aqua compas
 	FastLED.delay(500);
 
-	while(digitalRead(BTN1_PIN) != 0){
-		pot_hour = analogRead(POT_PIN);
+	while(digitalRead(PIN_BTN1) != 0){
+		pot_hour = analogRead(PIN_POT);
 		pot_hour = map(pot_hour, 0, 1023, 1, 12);
 
 		hour_pos = ((pot_hour*2)-1);
@@ -724,12 +725,12 @@ void CLOCK_SetTime(void){
 	mRing.displayCompas(128);
 	FastLED.delay(500);
 
-	while(digitalRead(BTN1_PIN) != 0){
+	while(digitalRead(PIN_BTN1) != 0){
 
 		//get average value of 5 readings
 		pot_min = 0;
 		for(uint8_t i = 0; i < 5; i++){
-			pot_val[i] = analogRead(POT_PIN);
+			pot_val[i] = analogRead(PIN_POT);
 			pot_min += pot_val[i];
 		}
 		pot_min /= 5;
@@ -902,12 +903,12 @@ void CLOCK_MaintainanceMode(void){
 	FastLED.show();
 
 	// Wait until the button is released
-	while(!digitalRead(BTN1_PIN)){}
+	while(!digitalRead(PIN_BTN1)){}
 
 	FastLED.delay(300);
 
 	// Wait until the button is pressed again
-	while(digitalRead(BTN1_PIN)){}
+	while(digitalRead(PIN_BTN1)){}
 
 	CLOCK_FadeToBlack();  
 
@@ -916,32 +917,32 @@ void CLOCK_MaintainanceMode(void){
 	t.min = 15;
 	CLOCK_DisplayQuarter(255, t);
 	CLOCK_FadeToBlack();  
-	if(digitalRead(BTN1_PIN) == 0){
+	if(digitalRead(PIN_BTN1) == 0){
 		return;
 	}
 
 	CLOCK_DisplayHalfHour(150);
 	CLOCK_FadeToBlack();  
-	if(digitalRead(BTN1_PIN) == 0){
+	if(digitalRead(PIN_BTN1) == 0){
 		return;
 	}
 
 	t.min = 45;
 	CLOCK_DisplayTriQuarter(255, t);
 	CLOCK_FadeToBlack();  
-	if(digitalRead(BTN1_PIN) == 0){
+	if(digitalRead(PIN_BTN1) == 0){
 		return;
 	}
 
 	CLOCK_DisplayFullHour(130);
-	if(digitalRead(BTN1_PIN) == 0){
+	if(digitalRead(PIN_BTN1) == 0){
 		return;
 	}
 
 	while(1){
 		CLOCK_DisplayFirework();
 
-		if(digitalRead(BTN1_PIN) == 0){
+		if(digitalRead(PIN_BTN1) == 0){
 			break;
 		}
 	}	

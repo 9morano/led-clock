@@ -4,11 +4,12 @@
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- DEFINES -----------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
+#define PIN_RING_MIN 5
+#define PIN_RING_HOUR 3
 
 #define LED_TYPE    WS2812
 #define COLOR_ORDER GRB
-#define PIN_NUM_MIN 5
-#define PIN_NUM_HOUR 3
+#define START_BRIGHTNESS 100
 #define NUM_LED_HOUR 24
 #define NUM_LED_MIN  60
 
@@ -56,7 +57,6 @@ class HourRing{
     //Functions for mode: clock
     void updateClockPosition(myTime t);
     void displayCompas(uint8_t hue);
-    void displayCompasBig(uint8_t hue);
     void displayClockVariableColor(int color);
     void displayClockUserColor(user_color uc);
     void displayClockPredefinedColor(int fact); 
