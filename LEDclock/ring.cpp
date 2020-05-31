@@ -35,8 +35,13 @@ void HourRing :: displayCompas(uint8_t hue){
   
   setHSV(18, hue, 250, 200);
   setHSV(19, hue, 250, 200);
+
+  last_compas_hue = hue;
 }
 
+uint8_t HourRing :: getCompasHue(void){
+  return last_compas_hue;
+}
 
 /* ----------------------------------------------------------------------------------------------------*/
 void HourRing::displayClockVariableColor(int color){

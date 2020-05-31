@@ -453,8 +453,6 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 	}
 
 
-	// TODO get pixel color, and give that as variable to functions call
-	
 	// Disable special effects durring night
 	// So it doesn't wake up whole neighbour-hood 
 	if(photo > 100 && (t.hour > 8 && t.hour < 23))
@@ -462,19 +460,19 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 		// Every 15min display one fo the effects
 		if((t.min == 0) && (t.sec == 5))
 		{
-			CLOCK_DisplayFullHour(color);
+			CLOCK_DisplayFullHour(hRing.getCompasHue());
 		}
 		else if((t.min == 15) && (t.sec == 5))
 		{
-			CLOCK_DisplayQuarter(val, t);
+			CLOCK_DisplayQuarter(hRing.getCompasHue(), t);
 		}
 		else if((t.min == 30) && (t.sec == 5))
 		{
-			CLOCK_DisplayHalfHour(color);
+			CLOCK_DisplayHalfHour(hRing.getCompasHue());
 		}
 		else if((t.min == 45) && (t.sec == 5))
 		{
-			CLOCK_DisplayTriQuarter(color, t);
+			CLOCK_DisplayTriQuarter(hRing.getCompasHue(), t);
 		}
 		else if((t.hour == 13) && (t.min == 20) && (t.sec == 5))
 		{	

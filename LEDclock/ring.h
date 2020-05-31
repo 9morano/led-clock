@@ -41,6 +41,7 @@ typedef struct user_color{
 class HourRing{
   public:
     uint8_t px_hou;
+    uint8_t last_compas_hue;
 
     //Constructor
     HourRing();
@@ -60,6 +61,8 @@ class HourRing{
     void displayClockVariableColor(int color);
     void displayClockUserColor(user_color uc);
     void displayClockPredefinedColor(int fact); 
+
+    uint8_t getCompasHue(void);
 };
 
 
