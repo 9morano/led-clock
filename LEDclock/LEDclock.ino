@@ -46,17 +46,19 @@
 #include "ring.h"
 
 
+// Set to 1 for debug messages over serial connection
 #define DEBUG 1
 
 #define STR(s) (#s)
 
 #if DEBUG
-	#define LOG_INFO(s, x) Serial.print(STR(s)); \
+	#define SERIAL_DEBUG(s, x) Serial.print(STR(s)); \
 							Serial.print(" "); \
 							Serial.println((x))
 #else
-	#define LOG_INFO(s, x)
+	#define SERIAL_DEBUG(s, x)
 #endif
+
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- DEFINES -----------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
@@ -68,7 +70,6 @@
 // Defined in ring.h
 //#define PIN_RING_MIN 5
 //#define PIN_RING_HOUR 3
-
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
@@ -141,11 +142,13 @@ void CLOCK_MaintainanceMode		(void);
 void setup() {
 	delay(100);
 
+#if DEBUG
 	// Initialize serial connection - debugging purposes  
-	Serial.begin(115200);	// TODO dodej v #ifdef #endif
+	Serial.begin(115200);
 
 	Serial.print("Debugging state: ");
 	Serial.println(DEBUG);
+#endif
 
 	// Initialize GPIO pins for buttons
 	pinMode(PIN_BTN1, INPUT_PULLUP);
@@ -218,7 +221,7 @@ void loop() {
 					}
 					type = 0; //reset type counter so it allways starts from begining
 
-					LOG_INFO(Mode:, mode);
+					SERIAL_DEBUG(Mode:, mode);
 				}   
 			}
 		}
@@ -241,7 +244,7 @@ void loop() {
 					if(type >= type_num){
 						type = 0;
 					}
-					LOG_INFO(Type:, type);
+					SERIAL_DEBUG(Type:, type);
 				}        
 			}
 		}  
@@ -266,13 +269,12 @@ void loop() {
 
 	aVal = map(avgVal,0,1023,0,255);
   
-	//LOG_INFO(Pot value:, aVal);
+	//SERIAL_DEBUG(Pot value:, aVal);
 
 	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
 	photo = analogRead(PIN_PHOTO);
 
 	/*
-	Serial.println(photo);
 	photo = map(photo,0,1023,0,255);
 	FastLED.setBrightness(photo);
 	if(photo < 100){
