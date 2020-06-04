@@ -54,7 +54,7 @@
 #if DEBUG
 	#define SERIAL_DEBUG(s, x) Serial.print(STR(s)); \
 							Serial.print(" "); \
-							Serial.println((x))
+							Serial.println((x));
 #else
 	#define SERIAL_DEBUG(s, x)
 #endif
