@@ -59,6 +59,8 @@
 	#define SERIAL_DEBUG(s, x)
 #endif
 
+#define USE_PHOTO_RESISTOR	(0)
+
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- DEFINES -----------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
@@ -72,6 +74,7 @@
 
 #define NUM_OF_CLOCK_MODES	4
 #define NUM_OF_CLOCK_TYPES	4
+
 #define BTN_DEBOUNCE_DELAY 	50
 
 /* ----------------------------------------------------------------------------------------------------*/
@@ -97,7 +100,7 @@ uint8_t clock_mode = 0;
 uint8_t clock_type = 1;
 
 // Value of photo resistor
-int photo = 1023;
+int photo_val = 1023;
 
 // Variable for color of the clock
 user_color clock_color;
@@ -273,26 +276,29 @@ void loop() {
 	//SERIAL_DEBUG(Pot value:, analog_val);
 
 	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
-	photo = analogRead(PIN_PHOTO);
+#if USE_PHOTO_RESISTOR
+	photo_val = analogRead(PIN_PHOTO);
 
-	/*
-	photo = map(photo,0,1023,0,255);
-	FastLED.setBrightness(photo);
-	if(photo < 100){
-		FastLED.setBrightness(0);
-	}*/
+	//SERIAL_DEBUG(Photo value:, photo_val);
 
-	/*
-	if(photo < 120){
+	photo_val = map(photo_val,0,1023,0,255);
+	FastLED.setBrightness(photo_val);
+	if(photo_val < 100){
 		FastLED.setBrightness(0);
 	}
-	else if(photo > 900){
+
+	/*
+	if(photo_val < 120){
+		FastLED.setBrightness(0);
+	}
+	else if(photo_val > 900){
 		FastLED.setBrightness(200);
 	}
 	else{
 		FastLED.setBrightness(100);
 	}
 	*/
+#endif
 
 	/*---------DISPLAY LEDS IN GIVEN MODE-------------------------------*/
 	switch(clock_mode){
