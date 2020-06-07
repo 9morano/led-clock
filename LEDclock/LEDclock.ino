@@ -66,10 +66,13 @@
 #define PIN_BTN2 9
 #define PIN_POT A1
 #define PIN_PHOTO A0
+//#define PIN_RING_MIN 5	// Defined in ring.h, here just for info
+//#define PIN_RING_HOUR 3	// Defined in ring.h, here just for info
 
-// Defined in ring.h
-//#define PIN_RING_MIN 5
-//#define PIN_RING_HOUR 3
+
+#define NUM_OF_CLOCK_MODES	4
+#define NUM_OF_CLOCK_TYPES	4
+#define BTN_DEBOUNCE_DELAY 	50
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
@@ -89,11 +92,9 @@ HourRing hRing;
 
 // Variable for clock modes
 uint8_t clock_mode = 0;
-uint8_t num_of_modes = 4;		// TODO move to define
 
 // Variable for different types of same mode
 uint8_t clock_type = 1;
-uint8_t num_of_types = 4;
 
 // Value of photo resistor
 int photo = 1023;
@@ -185,7 +186,6 @@ void loop() {
 	static uint8_t btn2 = 1;
 	static unsigned long btn1_debounce_time;
 	static unsigned long btn2_debounce_time;
-	uint8_t debounce_delay = 50;
 
 
 	/*---------BUTTON STATE CHECK------------------------------*/
@@ -203,7 +203,7 @@ void loop() {
 	}
 
 	// If BTN 1 is pressed
-	if((millis() - btn1_debounce_time) > debounce_delay)
+	if((millis() - btn1_debounce_time) > BTN_DEBOUNCE_DELAY)
 	{
 		if(btn1_read != btn1)
 		{
@@ -217,7 +217,7 @@ void loop() {
 				else{
 					//change mode in circular order
 					clock_mode ++;
-					if(clock_mode >= num_of_modes){
+					if(clock_mode >= NUM_OF_CLOCK_MODES){
 						clock_mode = 0;
 					}
 					clock_type = 0; //reset type counter so it allways starts from begining
@@ -228,7 +228,7 @@ void loop() {
 		}
 	}
 	//If BTN 2 is pressed
-	if((millis() - btn2_debounce_time) > debounce_delay)
+	if((millis() - btn2_debounce_time) > BTN_DEBOUNCE_DELAY)
 	{
 		if(btn2_read != btn2)
 		{
@@ -242,7 +242,7 @@ void loop() {
 				else{
 					//change type in circular order
 					clock_type ++;
-					if(clock_type >= num_of_types){
+					if(clock_type >= NUM_OF_CLOCK_TYPES){
 						clock_type = 0;
 					}
 					SERIAL_DEBUG(Type:, clock_type);
@@ -254,7 +254,7 @@ void loop() {
 	btn2_last_state = btn2_read;
 
 	/*---------GET POTENTIOMETER VALUE------------------------------*/
-	// Average reading of 5 potentiometer values, because pot varies up/down
+	// Average reading of 5 potentiometer values, because potentiometer varies up/down
 
 	pot_val[pot_count] = analogRead(PIN_POT);
 	pot_count++;
