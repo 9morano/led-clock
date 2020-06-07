@@ -4,7 +4,7 @@
  * 
  * Ver.:  8.1
  * Auth.: Grega Morano
- * Date.: 1.6.2020
+ * Date.: 7.6.2020
  * 
  * --------------------------------------------------------------------------------------------------
  * User can change modes of the clock with BTN 1, types with BTN 2
@@ -40,44 +40,20 @@
 
 // TODO: testjrej BD show zdej ku si spremenu ku nej vč for zanke...tudi mantainance mode je zdej drgačn
 // TODO: fix tabs in ring.cpp
+// TODO: Fix compiler warnings
 
 /* ----------------------------------------------------------------------------------------------------*/
-#include <FastLED.h>
-#include "DS3231.h"
+#include "LEDclock.h"
 #include "ring.h"
-
-
-// Set to 1 for debug messages over serial connection
-#define DEBUG 1
-
-#define STR(s) (#s)
-
-
-
-#define USE_PHOTO_RESISTOR	(0)
-
-/* ----------------------------------------------------------------------------------------------------*/
-/*--------------- DEFINES -----------------------------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------*/
-#define PIN_BTN1 7
-#define PIN_BTN2 9
-#define PIN_POT A1
-#define PIN_PHOTO A0
-//#define PIN_RING_MIN 5	// Defined in ring.h, here just for info
-//#define PIN_RING_HOUR 3	// Defined in ring.h, here just for info
-
-
-#define NUM_OF_CLOCK_MODES	5
-#define NUM_OF_CLOCK_TYPES	4
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
 
-// DS3231 clock module library declaration
+// DS3231 clock module
 DS3231  Clock;
 
-// FastLED strip declarations
+// FastLED array for led manipulation
 CRGB HourLeds[NUM_LED_HOUR];
 CRGB MinLeds[NUM_LED_MIN];
 

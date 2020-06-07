@@ -1,30 +1,21 @@
-#include <FastLED.h>
-#include <DS3231.h>
+/* --------------------------------------------------------------------------------------------------
+ * TODO
+ * 
+ * Ver.:  8.1
+ * Auth.: Grega Morano
+ * Date.: 7.6.2020
+ * 
+ * --------------------------------------------------------------------------------------------------*/
+
+#include "LEDclock.h"
 
 /* ----------------------------------------------------------------------------------------------------*/
-/*--------------- DEFINES -----------------------------------------------------------------------------*/
+/*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
-#define PIN_RING_MIN 5
-#define PIN_RING_HOUR 3
 
-#define LED_TYPE    WS2812
-#define COLOR_ORDER GRB
-#define START_BRIGHTNESS 100
-#define NUM_LED_HOUR 24
-#define NUM_LED_MIN  60
-
-
+// Extern - from LEDclock.ino
 extern CRGB HourLeds[NUM_LED_HOUR];
 extern CRGB MinLeds[NUM_LED_MIN];
-
-
-#if DEBUG
-	#define SERIAL_DEBUG(s, x) Serial.print(STR(s)); \
-							Serial.print(" "); \
-							Serial.println((x));
-#else
-	#define SERIAL_DEBUG(s, x)
-#endif
 
 
 /* ----------------------------------------------------------------------------------------------------*/
