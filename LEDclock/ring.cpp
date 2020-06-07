@@ -15,98 +15,109 @@
 /* ----------------------------------------------------------------------------------------------------*/
 
 //Hour Ring constructor (init)
-HourRing :: HourRing(){
-  //Serial.println("INIT Minute Led Strip");
-  FastLED.addLeds<LED_TYPE,PIN_RING_HOUR,COLOR_ORDER>(HourLeds, NUM_LED_HOUR).setCorrection(TypicalLEDStrip);
+HourRing :: HourRing()
+{
+	//Serial.println("INIT Minute Led Strip");
+	FastLED.addLeds<LED_TYPE,PIN_RING_HOUR,COLOR_ORDER>(HourLeds, NUM_LED_HOUR).setCorrection(TypicalLEDStrip);
 
-  px_hou = 0;
+	px_hou = 0;
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: updateClockPosition(myTime t){
-  int tmp = 0;
-  tmp = t.hour % 12; //from 24h format to 12h
-  px_hou = tmp;
+void HourRing :: updateClockPosition(myTime t)
+{
+	uint8_t tmp = 0;
+	tmp = t.hour % 12; //from 24h format to 12h
+	px_hou = tmp;
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: displayCompas(uint8_t hue){
-  setHSV(0, hue, 250, 200);
-  setHSV(1, hue, 250, 200);
-  
-  setHSV(6, hue, 250, 200);
-  setHSV(7, hue, 250, 200);
-  
-  setHSV(12, hue, 250, 200);
-  setHSV(13, hue, 250, 200);
-  
-  setHSV(18, hue, 250, 200);
-  setHSV(19, hue, 250, 200);
+void HourRing :: displayCompas(uint8_t hue)
+{
+	setHSV(0, hue, 250, 200);
+	setHSV(1, hue, 250, 200);
+	
+	setHSV(6, hue, 250, 200);
+	setHSV(7, hue, 250, 200);
+	
+	setHSV(12, hue, 250, 200);
+	setHSV(13, hue, 250, 200);
+	
+	setHSV(18, hue, 250, 200);
+	setHSV(19, hue, 250, 200);
 
-  last_compas_hue = hue;
+	last_compas_hue = hue;
 }
 
-uint8_t HourRing :: getCompasHue(void){
-  return last_compas_hue;
+uint8_t HourRing :: getCompasHue(void)
+{
+	return last_compas_hue;
 }
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing::displayClockVariableColor(int color){
-  setBlack();
+void HourRing::displayClockVariableColor(int color)
+{
+	setBlack();
 
-  //display compas of hours
-  displayCompas(color);
-    
-  setHSV(px_hou*2, (color - 40), 255, 250);
-  setHSV((px_hou*2)+1, (color - 40), 255, 250);
+	//display compas of hours
+	displayCompas(color);
+		
+	setHSV(px_hou*2, (color - 40), 255, 250);
+	setHSV((px_hou*2)+1, (color - 40), 255, 250);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: displayClockPredefinedColor(int fact){
-  nscale8(HourLeds,NUM_LED_HOUR,253); 
-  
-  fact = fact/43;   // faktorji med 0 in 5
+void HourRing :: displayClockPredefinedColor(int fact)
+{
+	nscale8(HourLeds,NUM_LED_HOUR,253); 
 
-  switch(fact){
-    //red 0
-    case 0:
-      displayCompas(0);//red
-      setHSV(px_hou*2, 20, 255, 250);//orange
-      setHSV((px_hou*2)+1, 20, 255, 250);//orange
-    break;
-  //yellow 42
-    case 1:
-      displayCompas(42);//yellow
-      setHSV(px_hou*2, 160, 255, 250);//blue
-      setHSV((px_hou*2)+1, 160, 255, 250);//blue
-    break;
-  //green 85
-    case 2:
-      displayCompas(82);//green
-      setHSV(px_hou*2, 128, 255, 250);//aqua
-      setHSV((px_hou*2)+1, 128, 255, 250);//aqua
-    break;
-  //aqua 128
-    case 3:
-      displayCompas(171);//blue
-      setHSV(px_hou*2, 128, 255, 250);//aqua
-      setHSV((px_hou*2)+1, 128, 255, 250);//aqua
-    break;
-  //blue 171
-    case 4:
-      displayCompas(171);//blue
-      setHSV(px_hou*2, 208, 255, 255);//purple
-      setHSV((px_hou*2)+1, 208, 255, 255);//purple
-    break;
-  //purple 213
-    case 5:
-      displayCompas(213);//purple
-      setHSV(px_hou*2, 171, 255, 250);//blue
-      setHSV((px_hou*2)+1, 171, 255, 250);//blue
-    break;  
+	fact = fact/43;   // faktorji med 0 in 5
+
+	switch(fact){
+	//red 0
+		case 0:
+		displayCompas(0);//red
+		setHSV(px_hou*2, 20, 255, 250);//orange
+		setHSV((px_hou*2)+1, 20, 255, 250);//orange
+		break;
+
+	//yellow 42
+	case 1:
+		displayCompas(42);//yellow
+		setHSV(px_hou*2, 160, 255, 250);//blue
+		setHSV((px_hou*2)+1, 160, 255, 250);//blue
+		break;
+
+	//green 85
+	case 2:
+		displayCompas(82);//green
+		setHSV(px_hou*2, 128, 255, 250);//aqua
+		setHSV((px_hou*2)+1, 128, 255, 250);//aqua
+		break;
+
+	//aqua 128
+	case 3:
+		displayCompas(171);//blue
+		setHSV(px_hou*2, 128, 255, 250);//aqua
+		setHSV((px_hou*2)+1, 128, 255, 250);//aqua
+		break;
+
+	//blue 171
+	case 4:
+		displayCompas(171);//blue
+		setHSV(px_hou*2, 208, 255, 255);//purple
+		setHSV((px_hou*2)+1, 208, 255, 255);//purple
+		break;
+
+	//purple 213
+	case 5:
+		displayCompas(213);//purple
+		setHSV(px_hou*2, 171, 255, 250);//blue
+		setHSV((px_hou*2)+1, 171, 255, 250);//blue
+		break;  
   }
 }
 
@@ -114,98 +125,104 @@ void HourRing :: displayClockPredefinedColor(int fact){
 /* ----------------------------------------------------------------------------------------------------*/
 void HourRing :: displayClockUserColor(user_color uc)
 {
-  setBlack();
+	setBlack();
 
-  //display compas of hours
-  displayCompas(uc.compas);
-    
-  setHSV(px_hou*2, uc.hour_color, 255, 250);
-  setHSV((px_hou*2)+1, uc.hour_color, 255, 250);
+	//display compas of hours
+	displayCompas(uc.compas);
+
+	setHSV(px_hou*2, uc.hour_color, 255, 250);
+	setHSV((px_hou*2)+1, uc.hour_color, 255, 250);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to black - off
-void HourRing :: setBlack(void){
-  for(int i=0; i<NUM_LED_HOUR; i++){
-    HourLeds[i] = CRGB :: Black;
-  }
+void HourRing :: setBlack(void)
+{
+	for(int i=0; i<NUM_LED_HOUR; i++){
+		HourLeds[i] = CRGB :: Black;
+	}
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: setWhite(void){
-  for(int i=0; i<NUM_LED_HOUR; i++){
-    HourLeds[i] = CRGB :: White;
-  }
+void HourRing :: setWhite(void)
+{
+	for(int i=0; i<NUM_LED_HOUR; i++){
+		HourLeds[i] = CRGB :: White;
+	}
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in RGB order
-void HourRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b){
-  HourLeds[pixel].setRGB(r, g, b);
+void HourRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b)
+{
+	HourLeds[pixel].setRGB(r, g, b);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 //Set leds to same color in HSV order
-void HourRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v){
-  HourLeds[pixel].setHSV(h, s, v);
+void HourRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v)
+{
+	HourLeds[pixel].setHSV(h, s, v);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 //Set all leds to same color in HSV order
-void HourRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v){
-  
-  for(int i=0; i<NUM_LED_HOUR; i++){
-    HourLeds[i].setHSV(h, s, v);
-  }
+void HourRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v)
+{ 
+	for(int i=0; i<NUM_LED_HOUR; i++){
+		HourLeds[i].setHSV(h, s, v);
+	}
  }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 //All leds assamble a rainbow - variable says with which colour
 //to start the rainbow
-void HourRing :: rainbow(uint8_t start_hue){
-  //this one looks better
-  fill_gradient(HourLeds, NUM_LED_HOUR, CHSV(start_hue,255,220), CHSV(start_hue+1,255,220), LONGEST_HUES);
-  //fill_rainbow(HourLeds, NUM_LED_HOUR, start_hue, 4);
+void HourRing :: rainbow(uint8_t start_hue)
+{
+	//this one looks better
+	fill_gradient(HourLeds, NUM_LED_HOUR, CHSV(start_hue,255,220), CHSV(start_hue+1,255,220), LONGEST_HUES);
+	//fill_rainbow(HourLeds, NUM_LED_HOUR, start_hue, 4);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void HourRing :: colorWipe(int hue, int wait, int start_px){
+void HourRing :: colorWipe(int hue, int wait, int start_px)
+{
 
-//TODO: popravi tle pozicijo - start_px je prau, sam uro dej x2
-  
-  if(hue == -1){
-    for (int i=(start_px*2); i<NUM_LED_HOUR; i++){
-      setHSV(i, 20, 255, 0);
-      FastLED.show();
-      FastLED.delay(wait);
-    }
-    for (int j=0; j<(start_px*2); j++){
-      setHSV(j, 20, 255, 0);
-      FastLED.show();
-      FastLED.delay(wait);
-    }
-  }
-  else
-  {
-    for (int i=(start_px*2); i<NUM_LED_HOUR; i++){
-      setHSV(i, hue, 255, 255);
-      FastLED.show();
-      FastLED.delay(wait);
-    }
-    for (int j=0; j<(start_px*2); j++){
-      setHSV(j, hue, 255, 255);
-      FastLED.show();
-      FastLED.delay(wait);
-    }
-  }
-  
+	//TODO: popravi tle pozicijo - start_px je prau, sam uro dej x2
+
+	if(hue == -1){
+		for (int i=(start_px*2); i<NUM_LED_HOUR; i++){
+			setHSV(i, 20, 255, 0);
+			FastLED.show();
+			FastLED.delay(wait);
+		}
+		for (int j=0; j<(start_px*2); j++){
+			setHSV(j, 20, 255, 0);
+			FastLED.show();
+			FastLED.delay(wait);
+		}
+	}
+	else
+	{
+		for (int i=(start_px*2); i<NUM_LED_HOUR; i++){
+			setHSV(i, hue, 255, 255);
+			FastLED.show();
+			FastLED.delay(wait);
+		}
+		for (int j=0; j<(start_px*2); j++){
+			setHSV(j, hue, 255, 255);
+			FastLED.show();
+			FastLED.delay(wait);
+		}
+	}
+
 }
 
 
@@ -302,34 +319,34 @@ void MinRing :: displayCompasSmall(uint8_t hue)
 /* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayClockUserColor(user_color uc)
 {
-  // Scale down the brightness of leds - smooth pixel transition
-  nscale8(MinLeds,NUM_LED_MIN,253);
+	// Scale down the brightness of leds - smooth pixel transition
+	nscale8(MinLeds,NUM_LED_MIN,253);
 
-  // Set compas of minute ring
-  displayCompasSmall(uc.compas);
-  
-  // Set minutes
-  setHSV(px_min, uc.min_color, 255, 250);
+	// Set compas of minute ring
+	displayCompasSmall(uc.compas);
+
+	// Set minutes
+	setHSV(px_min, uc.min_color, 255, 250);
 }
 
 /* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: displayClockVariableColor(int color)
 {
-  // Scale down the brightness of leds - smooth pixel transition
-  nscale8(MinLeds,NUM_LED_MIN,253); 
+	// Scale down the brightness of leds - smooth pixel transition
+	nscale8(MinLeds,NUM_LED_MIN,253); 
 
-  // Set compas of minute ring
-  displayCompas(color);
-  
-  // Set minutes and seconds
-  setHSV(px_min, (color - 40), 255, 250);
-  setHSV(px_sec, (color + 40), 255, 250);
+	// Set compas of minute ring
+	displayCompas(color);
+
+	// Set minutes and seconds
+	setHSV(px_min, (color - 40), 255, 250);
+	setHSV(px_sec, (color + 40), 255, 250);
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void MinRing :: displayClockPredefinedColor(int factor){
-
+void MinRing :: displayClockPredefinedColor(int factor)
+{
 	// Set leds to black
 	nscale8(MinLeds,NUM_LED_MIN,100); 
 
@@ -393,18 +410,18 @@ void MinRing :: displayClockPredefinedColor(int factor){
 //Set all leds to black - off
 void MinRing :: setBlack(void)
 {
-  for(int i=0; i<NUM_LED_MIN; i++){
-    MinLeds[i] = CRGB :: Black;
-  }
+	for(int i=0; i<NUM_LED_MIN; i++){
+		MinLeds[i] = CRGB :: Black;
+	}
 }
 
 
 /* ----------------------------------------------------------------------------------------------------*/
 void MinRing :: setWhite(void)
 {
-  for(int i=0; i<NUM_LED_MIN; i++){
-    MinLeds[i] = CRGB :: White;
-  }
+	for(int i=0; i<NUM_LED_MIN; i++){
+		MinLeds[i] = CRGB :: White;
+	}
 }
 
 
@@ -412,7 +429,7 @@ void MinRing :: setWhite(void)
 //Set leds to same color in RGB order
 void MinRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b)
 {
-  MinLeds[pixel].setRGB(r, g, b);
+  	MinLeds[pixel].setRGB(r, g, b);
 }
 
 
@@ -420,7 +437,7 @@ void MinRing :: setRGB(int pixel, uint8_t r, uint8_t g, uint8_t b)
 //Set leds to same color in HSV order
 void MinRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v)
 {
-  MinLeds[pixel].setHSV(h, s, v);
+ 	 MinLeds[pixel].setHSV(h, s, v);
 }
 
 
@@ -428,9 +445,9 @@ void MinRing :: setHSV(int pixel, uint8_t h, uint8_t s, uint8_t v)
 //Set all leds to same color in HSV order
 void MinRing :: setAllHSV(uint8_t h, uint8_t s, uint8_t v)
 {
-  for(int i=0; i<NUM_LED_MIN; i++){
-    MinLeds[i].setHSV(h, s, v);
-  }
+	for(int i=0; i<NUM_LED_MIN; i++){
+		MinLeds[i].setHSV(h, s, v);
+	}
 }
 
 
@@ -623,12 +640,4 @@ void MinRing :: rainbowFillin(uint8_t start_hue)
 	FastLED.show();
 
 	FastLED.delay(500);
-}
-
-
-
-/* ----------------------------------------------------------------------------------------------------*/
-void MinRing :: birthDayShow(uint8_t hue)
-{
-	//setHSV(35)
 }

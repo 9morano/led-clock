@@ -88,14 +88,13 @@ class MinRing{
     void setAllHSV(uint8_t h, uint8_t s, uint8_t v);
     void rainbow(uint8_t start_hue);
     void rainbowFaling (int hue);
- 
-    
+
+
     //With FastLED.show() in the function
     void colorWipe(int hue, int wait, int start_px);
     void quarterWipe(int hue, int wait);
     void rainbowCycle(int delay_time);
     void rainbowFillin(uint8_t start_hue);
-    void birthDayShow(uint8_t hue);
 
     //Functions for mode: clock
     void updateClockPosition(myTime t);

@@ -111,8 +111,6 @@ void setup() {
 	SERIAL_DEBUG(Will clock use photo resistor?, USE_PHOTO_RESISTOR);
 #endif
 
-
-
 	// Initialize GPIO pins for buttons
 	pinMode(PIN_BTN1, INPUT_PULLUP);
 	pinMode(PIN_BTN2, INPUT_PULLUP);
@@ -339,7 +337,8 @@ void CLOCK_FadeToBlack(void)
 // MODE 0: User colors - without seconds
 // MODE 1: Variable colors -  with seconds
 // MODE 2: Predefined colors - with smooth seconds
-void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
+void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
+{
 
 	static int color = 0;
 	static int brightness = START_BRIGHTNESS;
