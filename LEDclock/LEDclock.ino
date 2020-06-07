@@ -105,7 +105,13 @@ void setup() {
 	Serial.begin(115200);
 
 	Serial.println("Debugging state is on!");
+
+	SERIAL_DEBUG(Number of clock modes:, NUM_OF_CLOCK_MODES);
+	SERIAL_DEBUG(Number of clock types:, NUM_OF_CLOCK_TYPES);
+	SERIAL_DEBUG(Will clock use photo resistor?, USE_PHOTO_RESISTOR);
 #endif
+
+
 
 	// Initialize GPIO pins for buttons
 	pinMode(PIN_BTN1, INPUT_PULLUP);
