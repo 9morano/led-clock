@@ -39,6 +39,7 @@
 
 
 // TODO: testjrej BD show zdej ku si spremenu ku nej vč for zanke...tudi mantainance mode je zdej drgačn
+// TODO: fix tabs in ring.cpp
 
 /* ----------------------------------------------------------------------------------------------------*/
 #include <FastLED.h>
@@ -51,13 +52,7 @@
 
 #define STR(s) (#s)
 
-#if DEBUG
-	#define SERIAL_DEBUG(s, x) Serial.print(STR(s)); \
-							Serial.print(" "); \
-							Serial.println((x));
-#else
-	#define SERIAL_DEBUG(s, x)
-#endif
+
 
 #define USE_PHOTO_RESISTOR	(0)
 
@@ -72,10 +67,8 @@
 //#define PIN_RING_HOUR 3	// Defined in ring.h, here just for info
 
 
-#define NUM_OF_CLOCK_MODES	4
+#define NUM_OF_CLOCK_MODES	5
 #define NUM_OF_CLOCK_TYPES	4
-
-#define BTN_DEBOUNCE_DELAY 	50
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*-------------- GLOBAL VARIABLES ---------------------------------------------------------------------*/
@@ -94,10 +87,10 @@ HourRing hRing;
 
 
 // Variable for clock modes
-uint8_t clock_mode = 0;
+uint8_t clock_mode = 2;
 
 // Variable for different types of same mode
-uint8_t clock_type = 1;
+uint8_t clock_type = 0;
 
 // Value of photo resistor
 int photo_val = 1023;
@@ -206,7 +199,7 @@ void loop() {
 	}
 
 	// If BTN 1 is pressed
-	if((millis() - btn1_debounce_time) > BTN_DEBOUNCE_DELAY)
+	if((millis() - btn1_debounce_time) > 50)
 	{
 		if(btn1_read != btn1)
 		{
@@ -218,12 +211,16 @@ void loop() {
 					CLOCK_SetTime();
 				}
 				else{
-					//change mode in circular order
+					// Change mode in circular order
 					clock_mode ++;
 					if(clock_mode >= NUM_OF_CLOCK_MODES){
 						clock_mode = 0;
 					}
-					clock_type = 0; //reset type counter so it allways starts from begining
+					// Reset type counter so it allways starts from begining
+					clock_type = 0; 
+
+					// Turn the leds off durring mode transition
+					CLOCK_FadeToBlack();
 
 					SERIAL_DEBUG(Mode:, clock_mode);
 				}   
@@ -231,7 +228,7 @@ void loop() {
 		}
 	}
 	//If BTN 2 is pressed
-	if((millis() - btn2_debounce_time) > BTN_DEBOUNCE_DELAY)
+	if((millis() - btn2_debounce_time) > 50)
 	{
 		if(btn2_read != btn2)
 		{
@@ -311,10 +308,14 @@ void loop() {
 			break;
 
 		case 2:
+			CLOCK_DisplayTime(2, analog_val, clock_type);
+			break;
+
+		case 3:
 			CLOCK_DisplayLamp(analog_val, clock_type);
 			break;  
 
-		case 3:
+		case 4:
 			CLOCK_DisplayTemperature();
 			break;
 
@@ -424,9 +425,8 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 					break;
 			}
 
-			// Prepare colors for clock
-			mRing.displayClockPredefinedColor(color);
-			hRing.displayClockPredefinedColor(color);
+			mRing.displayClockVariableColor(color);
+			hRing.displayClockVariableColor(color);
 			
 			// Adjust brightness
 			FastLED.setBrightness(brightness);
@@ -449,9 +449,9 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 					break;
 			}
 
-			// Prepare colors
-			mRing.displayClockVariableColor(color);
-			hRing.displayClockVariableColor(color);
+			// Prepare colors for clock
+			mRing.displayClockPredefinedColor(color);
+			hRing.displayClockPredefinedColor(color);// Prepare colors
 
 			// Adjust brightness
 			FastLED.setBrightness(brightness);
@@ -461,7 +461,7 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type){
 
 	// Disable special effects durring night
 	// So it doesn't wake up whole neighbour-hood 
-	if(photo > 100 && (t.hour > 8 && t.hour < 23))
+	if(photo_val > 100 && (t.hour > 8 && t.hour < 23))
 	{
 		// Every 15min display one fo the effects
 		if((t.min == 0) && (t.sec == 5))

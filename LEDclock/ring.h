@@ -17,6 +17,16 @@
 extern CRGB HourLeds[NUM_LED_HOUR];
 extern CRGB MinLeds[NUM_LED_MIN];
 
+
+#if DEBUG
+	#define SERIAL_DEBUG(s, x) Serial.print(STR(s)); \
+							Serial.print(" "); \
+							Serial.println((x));
+#else
+	#define SERIAL_DEBUG(s, x)
+#endif
+
+
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- TYPEDEFs ----------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
@@ -100,6 +110,7 @@ class MinRing{
     void updateClockPosition(myTime t);
     void displayCompas(uint8_t hue);
     void displayCompasBig(uint8_t hue);
+    void displayCompasSmall(uint8_t hue);
     void displayClockUserColor(user_color uc);
     void displayClockPredefinedColor(int fact);
     void displayClockVariableColor(int color);
