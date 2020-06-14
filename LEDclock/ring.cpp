@@ -336,7 +336,7 @@ void MinRing :: displayClockVariableColor(int color)
 	nscale8(MinLeds,NUM_LED_MIN,253); 
 
 	// Set compas of minute ring
-	displayCompas(color);
+	displayCompasSmall(color);
 
 	// Set minutes and seconds
 	setHSV(px_min, (color - 40), 255, 250);

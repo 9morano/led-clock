@@ -147,7 +147,7 @@ void setup() {
 /* ----------------------------------------------------------------------------------------------------*/
 void loop() {
 
-	/*---------VARIABLE DECLARATION ----------------------------*/
+	/*---------VARIABLE DECLARATION -------------------------------------------------------------------*/
 	// Potentiometer variables
 	static int pot_val[5];
 	static uint8_t pot_count = 0;
@@ -157,17 +157,19 @@ void loop() {
 	// Buttons variables
 	static uint8_t btn1_last_state = 1;
 	static uint8_t btn2_last_state = 1;
-	static uint8_t btn1 = 1;
-	static uint8_t btn2 = 1;
+	static uint8_t btn1_state = 1;
+	static uint8_t btn2_state = 1;
 	static unsigned long btn1_debounce_time;
 	static unsigned long btn2_debounce_time;
 
 
 	/*---------BUTTON STATE CHECK------------------------------*/
+	// Source: https://learn.adafruit.com/make-it-switch/debouncing 
+
 	uint8_t btn1_read = digitalRead(PIN_BTN1);
 	uint8_t btn2_read = digitalRead(PIN_BTN2);
 
-	// Check how long the button is pressed to prevent debouncing
+	// Check if the new state of the button is different from the last state
 	if(btn1_read != btn1_last_state)
 	{
 		btn1_debounce_time = millis();
@@ -177,16 +179,16 @@ void loop() {
 		btn2_debounce_time = millis();
 	}
 
-	// If BTN 1 is pressed
+	// If BTN 1 is pressed (time between state changes must be greather than 50ms)
 	if((millis() - btn1_debounce_time) > 50)
 	{
-		if(btn1_read != btn1)
+		if(btn1_read != btn1_state)
 		{
-			btn1 = btn1_read;
-			if(btn1 == LOW)
+			btn1_state = btn1_read;
+			if(btn1_state == LOW)
 			{	
 				//If later BTN 2 is also pressed
-				if(btn2 == LOW){
+				if(btn2_state == LOW){
 					CLOCK_SetTime();
 				}
 				else{
@@ -206,16 +208,16 @@ void loop() {
 			}
 		}
 	}
-	//If BTN 2 is pressed
+	//If BTN 2 is pressed (time between state changes must be greather than 50ms)
 	if((millis() - btn2_debounce_time) > 50)
 	{
-		if(btn2_read != btn2)
+		if(btn2_read != btn2_state)
 		{
-			btn2 = btn2_read;
-			if(btn2 == LOW)
+			btn2_state = btn2_read;
+			if(btn2_state == LOW)
 			{
 				//If later BTN 1 is also pressed
-				if(btn1 == LOW){
+				if(btn1_state == LOW){
 					CLOCK_SetTime();
 				}
 				else{
@@ -361,12 +363,12 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			switch(type){
 				case 0:
 				case 2:
-					brightness = val;
+					color = val;
 					break;
 				
 				case 1:
 				case 3:
-					color = val;
+					brightness = val;
 					break;
 				
 				default:
@@ -380,25 +382,49 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			// Adjust brightness
 			FastLED.setBrightness(brightness);
 			break;
-
+			
 		case 1:
+			// Toggle between Color and Brightness settings - depends on BTN2
+			switch(type){
+				case 0:
+				case 2:
+					color = val;
+					break;
+				
+				case 1:
+				case 3:
+					brightness = val;
+					break;
+				
+				default:
+					break;
+			}
+
+			mRing.displayClockVariableColor(color);
+			hRing.displayClockVariableColor(color);
+			
+			// Adjust brightness
+			FastLED.setBrightness(brightness);
+			break;
+
+		case 2:
 
 			// Get user colors - depending on type button (BTN2)
 			switch(type){
 				case 0:
-					brightness = val;
-					break;
-
-				case 1:
 					clock_color.compas = val;
 					break;
 
-				case 2:
+				case 1:
 					clock_color.min_color = val;
+					break;
+
+				case 2:
+					clock_color.hour_color = val;
 					break;
 				
 				case 3:
-					clock_color.hour_color = val;
+					brightness = val;
 					break;
 
 				default:
@@ -409,30 +435,6 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			mRing.displayClockUserColor(clock_color);
 			hRing.displayClockUserColor(clock_color);
 
-			// Adjust brightness
-			FastLED.setBrightness(brightness);
-			break;
-			
-		case 2:
-			// Toggle between Color and Brightness settings - depends on BTN2
-			switch(type){
-				case 0:
-				case 2:
-					brightness = val;
-					break;
-				
-				case 1:
-				case 3:
-					color = val;
-					break;
-				
-				default:
-					break;
-			}
-
-			mRing.displayClockVariableColor(color);
-			hRing.displayClockVariableColor(color);
-			
 			// Adjust brightness
 			FastLED.setBrightness(brightness);
 			break;
@@ -727,13 +729,19 @@ void CLOCK_SetTime(void){
 
 	CLOCK_FadeToBlack();
 
-	FastLED.delay(500);
-
-	// Hour setup
+	/*---------HOUR SETUP -----------------------------------------------------------------------------*/
 	hRing.displayCompas(128); //aqua compas
-	FastLED.delay(500);
+	FastLED.show();
 
-	while(digitalRead(PIN_BTN1) != 0){
+	// Wait until the button is released 
+	// user still holds it couple of seconds after compas is displayed
+	while(!digitalRead(PIN_BTN1)){}
+
+	FastLED.delay(300);
+
+	// Loop until one of the button is pressed
+	while(digitalRead(PIN_BTN1) == HIGH && digitalRead(PIN_BTN2) == HIGH){
+		// Get potentiometer reading and map it
 		pot_hour = analogRead(PIN_POT);
 		pot_hour = map(pot_hour, 0, 1023, 1, 12);
 
@@ -750,13 +758,14 @@ void CLOCK_SetTime(void){
 
 	FastLED.delay(500);
 
-	//minute setup
-	mRing.displayCompas(128);
+	/*---------MINUTE SETUP ---------------------------------------------------------------------------*/
+	mRing.displayCompasBig(128);
 	FastLED.delay(500);
 
-	while(digitalRead(PIN_BTN1) != 0){
+	// Loop until one of the button is pressed
+	while(digitalRead(PIN_BTN1) == HIGH  && digitalRead(PIN_BTN2) == HIGH){
 
-		//get average value of 5 readings
+		// Get average value of 5 readings
 		pot_min = 0;
 		for(uint8_t i = 0; i < 5; i++){
 			pot_val[i] = analogRead(PIN_POT);
@@ -765,23 +774,84 @@ void CLOCK_SetTime(void){
 		pot_min /= 5;
 		pot_min = map(pot_min, 0, 1023, 0, NUM_LED_MIN-1);
 
-		//In case of wrong aligment you can fix it here
+		// In case of wrong ring alignment you can fix it here
 		min_pos = pot_min;
 
-		//dimm the lights
+		// Dim the lights for smooth effect
 		nscale8(MinLeds, NUM_LED_MIN, 250);
 
-		//show position and compas
-		mRing.displayCompas(128);
+		// Show position and compas
+		mRing.displayCompasBig(128);
 		mRing.setHSV((min_pos), 40, 255, 255);
 		FastLED.show();
 	}
 
+	// Save the clock setting to the DS3231 module
 	Clock.setHour(pot_hour);
 	Clock.setMinute(pot_min);
 	Clock.setSecond(0);
 
 	CLOCK_FadeToBlack();
+}
+
+
+/* ----------------------------------------------------------------------------------------------------*/
+void CLOCK_MaintainanceMode(void)
+{
+	mRing.setBlack();
+	hRing.setBlack();
+	
+	// Turn on the compas - for displaying position / orientation of LED strip
+	mRing.displayCompasBig(255);
+	hRing.displayCompas(255);
+
+	FastLED.show();
+
+	// Wait until the button is released (user still holds it couple of seconds after compas is displayed)
+	while(!digitalRead(PIN_BTN1)){}
+
+	FastLED.delay(300);
+
+	// Wait until the button is pressed again
+	while(digitalRead(PIN_BTN1)){}
+
+	CLOCK_FadeToBlack();  
+
+	// Display some of clock patterns
+	myTime t;
+	t.hour = 12;
+	t.min = 15;
+	CLOCK_DisplayQuarter(255, t);
+	CLOCK_FadeToBlack();  
+	if(digitalRead(PIN_BTN1) == 0){
+		return;
+	}
+
+	CLOCK_DisplayHalfHour(150);
+	CLOCK_FadeToBlack();  
+	if(digitalRead(PIN_BTN1) == 0){
+		return;
+	}
+
+	t.min = 45;
+	CLOCK_DisplayTriQuarter(255, t);
+	CLOCK_FadeToBlack();  
+	if(digitalRead(PIN_BTN1) == 0){
+		return;
+	}
+
+	CLOCK_DisplayFullHour(130);
+	if(digitalRead(PIN_BTN1) == 0){
+		return;
+	}
+
+	while(1){
+		CLOCK_DisplayFirework();
+
+		if(digitalRead(PIN_BTN1) == 0){
+			break;
+		}
+	}	
 }
 
 
@@ -914,64 +984,4 @@ void CLOCK_DisplayFirework(void)
 	}
 	mRing.setBlack();
 	FastLED.show();
-}
-
-
-/* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_MaintainanceMode(void)
-{
-	mRing.setBlack();
-	hRing.setBlack();
-	
-	// Turn on the compas - for displaying position / orientation of LED strip
-	mRing.displayCompasSmall(255);
-	hRing.displayCompas(255);
-
-	FastLED.show();
-
-	// Wait until the button is released (user still holds it couple of seconds after compas is displayed)
-	while(!digitalRead(PIN_BTN1)){}
-
-	FastLED.delay(300);
-
-	// Wait until the button is pressed again
-	while(digitalRead(PIN_BTN1)){}
-
-	CLOCK_FadeToBlack();  
-
-	// Display some of clock patterns
-	myTime t;
-	t.hour = 12;
-	t.min = 15;
-	CLOCK_DisplayQuarter(255, t);
-	CLOCK_FadeToBlack();  
-	if(digitalRead(PIN_BTN1) == 0){
-		return;
-	}
-
-	CLOCK_DisplayHalfHour(150);
-	CLOCK_FadeToBlack();  
-	if(digitalRead(PIN_BTN1) == 0){
-		return;
-	}
-
-	t.min = 45;
-	CLOCK_DisplayTriQuarter(255, t);
-	CLOCK_FadeToBlack();  
-	if(digitalRead(PIN_BTN1) == 0){
-		return;
-	}
-
-	CLOCK_DisplayFullHour(130);
-	if(digitalRead(PIN_BTN1) == 0){
-		return;
-	}
-
-	while(1){
-		CLOCK_DisplayFirework();
-
-		if(digitalRead(PIN_BTN1) == 0){
-			break;
-		}
-	}	
 }
