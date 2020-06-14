@@ -39,7 +39,6 @@
 
 
 // TODO: testjrej BD show zdej ku si spremenu ku nej vč for zanke...tudi mantainance mode je zdej drgačn
-// TODO: fix tabs in ring.cpp
 // TODO: Fix compiler warnings
 
 /* ----------------------------------------------------------------------------------------------------*/
@@ -358,6 +357,31 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 
 	switch(mode){
 		case 0:
+			// Toggle between Color and Brightness settings - depends on BTN2
+			switch(type){
+				case 0:
+				case 2:
+					brightness = val;
+					break;
+				
+				case 1:
+				case 3:
+					color = val;
+					break;
+				
+				default:
+					break;
+			}
+
+			// Prepare colors for clock
+			mRing.displayClockPredefinedColor(color);
+			hRing.displayClockPredefinedColor(color);// Prepare colors
+
+			// Adjust brightness
+			FastLED.setBrightness(brightness);
+			break;
+
+		case 1:
 
 			// Get user colors - depending on type button (BTN2)
 			switch(type){
@@ -389,7 +413,7 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			FastLED.setBrightness(brightness);
 			break;
 			
-		case 1:
+		case 2:
 			// Toggle between Color and Brightness settings - depends on BTN2
 			switch(type){
 				case 0:
@@ -409,31 +433,6 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			mRing.displayClockVariableColor(color);
 			hRing.displayClockVariableColor(color);
 			
-			// Adjust brightness
-			FastLED.setBrightness(brightness);
-			break;
-
-		case 2:
-			// Toggle between Color and Brightness settings - depends on BTN2
-			switch(type){
-				case 0:
-				case 2:
-					brightness = val;
-					break;
-				
-				case 1:
-				case 3:
-					color = val;
-					break;
-				
-				default:
-					break;
-			}
-
-			// Prepare colors for clock
-			mRing.displayClockPredefinedColor(color);
-			hRing.displayClockPredefinedColor(color);// Prepare colors
-
 			// Adjust brightness
 			FastLED.setBrightness(brightness);
 			break;
@@ -919,20 +918,18 @@ void CLOCK_DisplayFirework(void)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-void CLOCK_MaintainanceMode(void){
-	 // For displaying position / orientation
+void CLOCK_MaintainanceMode(void)
+{
 	mRing.setBlack();
 	hRing.setBlack();
-	mRing.setHSV(0, 255, 255, 255);
-	mRing.setHSV(15, 255, 255, 255);
-	mRing.setHSV(30, 255, 255, 255);
-	mRing.setHSV(45, 255, 255, 255);
-
+	
+	// Turn on the compas - for displaying position / orientation of LED strip
+	mRing.displayCompasSmall(255);
 	hRing.displayCompas(255);
 
 	FastLED.show();
 
-	// Wait until the button is released
+	// Wait until the button is released (user still holds it couple of seconds after compas is displayed)
 	while(!digitalRead(PIN_BTN1)){}
 
 	FastLED.delay(300);
@@ -942,6 +939,7 @@ void CLOCK_MaintainanceMode(void){
 
 	CLOCK_FadeToBlack();  
 
+	// Display some of clock patterns
 	myTime t;
 	t.hour = 12;
 	t.min = 15;

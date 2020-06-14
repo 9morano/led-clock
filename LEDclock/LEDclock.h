@@ -14,13 +14,12 @@
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- WIRING ------------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
-// See wiring diagram for more details
-#define PIN_RING_HOUR   3
-#define PIN_RING_MIN    5
-#define PIN_BTN1        7
-#define PIN_BTN2        9
-#define PIN_POT         A1
-#define PIN_PHOTO       A0
+#define PIN_RING_HOUR   3   // WS2812 ring with 24 LEDs --> Arduino digital pin D3
+#define PIN_RING_MIN    5   // WS2812 ring with 60 LEDs --> Arduino digital pin D5
+#define PIN_BTN1        7   // Button 1                 --> Arduino digital pin D7
+#define PIN_BTN2        9   // Button 2                 --> Arduino digital pin D9
+#define PIN_POT         A1  // Potentiometer            --> Arduino analog pin A1
+#define PIN_PHOTO       A0  // Photo resistor           --> Arduino analog pin A0
 
 
 
