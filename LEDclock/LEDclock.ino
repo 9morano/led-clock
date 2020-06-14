@@ -62,7 +62,7 @@ HourRing hRing;
 
 
 // Variable for clock modes
-uint8_t clock_mode = 2;
+uint8_t clock_mode = 0;
 
 // Variable for different types of same mode
 uint8_t clock_type = 0;
@@ -118,14 +118,14 @@ void setup() {
 	Wire.begin();
 
 	// Configure clock module
-	Clock.setClockMode(false);  // set to 24h
+	Clock.setClockMode(true);  // set to 12h format
 
 	Clock.setYear(2020);
 	Clock.setMonth(6);
 	Clock.setDate(1);
-	Clock.setHour(12);
-	Clock.setMinute(20);
-	Clock.setSecond(0);
+	Clock.setHour(CLOCK_DEFAULT_HOUR);
+	Clock.setMinute(CLOCK_DEFAULT_MIN);
+	Clock.setSecond(CLOCK_DEFAULT_SEC);
 
 	// Set initial values of the user clock color
 	clock_color.compas = 255;
@@ -335,9 +335,9 @@ void CLOCK_FadeToBlack(void)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-// MODE 0: User colors - without seconds
+// MODE 0: Predefined colors - with milliseconds
 // MODE 1: Variable colors -  with seconds
-// MODE 2: Predefined colors - with smooth seconds
+// MODE 2: User colors - without seconds
 void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 {
 
@@ -721,11 +721,8 @@ void CLOCK_DisplayTemperature(void){
 
 /* ----------------------------------------------------------------------------------------------------*/
 void CLOCK_SetTime(void){
-	int pot_hour = 0;
-	int hour_pos;
-	int pot_min = 0;
-	int min_pos = 0;
-	int pot_val[5];
+	int pot_hour;
+	int pot_min;
 
 	CLOCK_FadeToBlack();
 
@@ -741,17 +738,24 @@ void CLOCK_SetTime(void){
 
 	// Loop until one of the button is pressed
 	while(digitalRead(PIN_BTN1) == HIGH && digitalRead(PIN_BTN2) == HIGH){
-		// Get potentiometer reading and map it
-		pot_hour = analogRead(PIN_POT);
-		pot_hour = map(pot_hour, 0, 1023, 1, 12);
 
-		hour_pos = ((pot_hour*2)-1);
+		// Get average value of 5 readings and map it
+		pot_hour = 0;
+		for(uint8_t i = 0; i < 5; i++){
+			// I have lousy potentiometer...high value readings don't happen often
+			// Thats why manually add 10 to the reading, so the value of 1023 appears more often
+			pot_hour += (analogRead(PIN_POT) + 10);	
+		}
+		pot_hour /= 5;
+		pot_hour = map(pot_hour, 0, 1023, 0, 11);
+
+		SERIAL_DEBUG("Hour pot", pot_hour);
 
 		nscale8(HourLeds,NUM_LED_HOUR,250);
 
 		hRing.displayCompas(128);
-		hRing.setHSV(hour_pos, 40, 255, 255);   
-		hRing.setHSV(hour_pos-1, 40, 255, 255);
+		hRing.setHSV(pot_hour*2, 40, 255, 255);   
+		hRing.setHSV(pot_hour*2+1, 40, 255, 255);
 
 		FastLED.show();
 	}
@@ -765,24 +769,22 @@ void CLOCK_SetTime(void){
 	// Loop until one of the button is pressed
 	while(digitalRead(PIN_BTN1) == HIGH  && digitalRead(PIN_BTN2) == HIGH){
 
-		// Get average value of 5 readings
+		// Get average value of 5 readings and map it
 		pot_min = 0;
 		for(uint8_t i = 0; i < 5; i++){
-			pot_val[i] = analogRead(PIN_POT);
-			pot_min += pot_val[i];
+			pot_min += (analogRead(PIN_POT) + 10); 
 		}
 		pot_min /= 5;
 		pot_min = map(pot_min, 0, 1023, 0, NUM_LED_MIN-1);
 
-		// In case of wrong ring alignment you can fix it here
-		min_pos = pot_min;
+		SERIAL_DEBUG("Min pos", pot_min);
 
 		// Dim the lights for smooth effect
 		nscale8(MinLeds, NUM_LED_MIN, 250);
 
 		// Show position and compas
 		mRing.displayCompasBig(128);
-		mRing.setHSV((min_pos), 40, 255, 255);
+		mRing.setHSV(pot_min, 40, 255, 255);
 		FastLED.show();
 	}
 
@@ -790,6 +792,10 @@ void CLOCK_SetTime(void){
 	Clock.setHour(pot_hour);
 	Clock.setMinute(pot_min);
 	Clock.setSecond(0);
+
+	// Reset clock mode and type
+	clock_type = 0;
+	clock_mode = 0;
 
 	CLOCK_FadeToBlack();
 }

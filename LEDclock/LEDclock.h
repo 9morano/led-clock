@@ -14,14 +14,19 @@
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- WIRING ------------------------------------------------------------------------------*/
 /* ----------------------------------------------------------------------------------------------------*/
-#define PIN_RING_HOUR   3   // WS2812 ring with 24 LEDs --> Arduino digital pin D3
-#define PIN_RING_MIN    5   // WS2812 ring with 60 LEDs --> Arduino digital pin D5
+// See schematics for more information about wireing
+
+#define PIN_RING_HOUR   3   // WS2812 (24 LEDs) DIN pin --> Arduino digital pin D3
+#define PIN_RING_MIN    5   // WS2812 (60 LEDs) DIN pin --> Arduino digital pin D5
 #define PIN_BTN1        7   // Button 1                 --> Arduino digital pin D7
 #define PIN_BTN2        9   // Button 2                 --> Arduino digital pin D9
 #define PIN_POT         A1  // Potentiometer            --> Arduino analog pin A1
 #define PIN_PHOTO       A0  // Photo resistor           --> Arduino analog pin A0
 
-
+// To use the hardware I2C interface of the Arduino (Uno or Nano) you must connect
+// 								DS3231 SDA pin  		--> Arduino Analog A4 or the dedicated SDA pin
+//         						DS3231 SCL pin   		--> Arduino Analog A5 or the dedicated SCL pin
+//
 
 /* ----------------------------------------------------------------------------------------------------*/
 /*--------------- CLOCK CONFIGURATION -----------------------------------------------------------------*/
@@ -60,3 +65,7 @@
 #define START_BRIGHTNESS    100
 #define NUM_LED_HOUR        24
 #define NUM_LED_MIN         60
+
+#define CLOCK_DEFAULT_HOUR	1
+#define CLOCK_DEFAULT_MIN	20
+#define CLOCK_DEFAULT_SEC	5
