@@ -33,16 +33,21 @@
 /* ----------------------------------------------------------------------------------------------------*/
 
 // If you want to use photo resistor to automatically dim the LEDs durring night, set macro to 1
-#define USE_PHOTO_RESISTOR	(0)
+#define USE_PHOTO_RESISTOR		(1)
+
+// Configure this number by your photo resistor - when is dark enough to turn the Clock off
+// My values are: 0 when bright and 1000 when dark. I want to turn the LEDs off when photoresistor is  
+// more than 860. You can use SERIAL_DEBUG (or Serial Monitor) to find your preffered value.
+#define CLOCK_PHOTO_TRESHOLD	(860)
 
 
 // Number of modes and defines that clock can have
-#define NUM_OF_CLOCK_MODES	(5)
-#define NUM_OF_CLOCK_TYPES	(4)
+#define NUM_OF_CLOCK_MODES		(5)
+#define NUM_OF_CLOCK_TYPES		(4)
 
 
 // If you want to see some debug messages in Serial Monitor, set DEBUG macro to 1
-#define DEBUG               (1)
+#define DEBUG               	(1)
 
 #if DEBUG
     #define STR(s) (#s)

@@ -4,12 +4,12 @@
  * 
  * Ver.:  8.1
  * Auth.: Grega Morano
- * Date.: 7.6.2020
+ * Date.: 14.6.2020
  * 
  * --------------------------------------------------------------------------------------------------
  * User can change modes of the clock with BTN 1, types with BTN 2
  * 4 Modes with different types:
- * 	- MODE 1: (default) clock where user can define colors and brightness. User can circle through 
+ * 	- MODE 1: clock where user can define colors and brightness. User can circle through 
  * 	  different types with button 2 - for type. Values are changed with potenciometter. 
  * 			TYPE 1: Set brightness of the clock
  * 			TYPE 2: Set compas color
@@ -253,30 +253,6 @@ void loop() {
   
 	//SERIAL_DEBUG(Pot value:, analog_val);
 
-	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
-#if USE_PHOTO_RESISTOR
-	photo_val = analogRead(PIN_PHOTO);
-
-	//SERIAL_DEBUG(Photo value:, photo_val);
-
-	photo_val = map(photo_val,0,1023,0,255);
-	FastLED.setBrightness(photo_val);
-	if(photo_val < 100){
-		FastLED.setBrightness(0);
-	}
-
-	/*
-	if(photo_val < 120){
-		FastLED.setBrightness(0);
-	}
-	else if(photo_val > 900){
-		FastLED.setBrightness(200);
-	}
-	else{
-		FastLED.setBrightness(100);
-	}
-	*/
-#endif
 
 	/*---------DISPLAY LEDS IN GIVEN MODE-------------------------------*/
 	switch(clock_mode){
@@ -304,6 +280,14 @@ void loop() {
 			CLOCK_DisplayLamp(analog_val, clock_type);
 			break;  
 	}  
+
+
+	/*---------SET BRIGHTNESS ACORDING TO PHOTO RESISTOR--------------*/
+#if USE_PHOTO_RESISTOR
+	photo_val = analogRead(PIN_PHOTO);
+
+	SERIAL_DEBUG(Photo value:, photo_val);
+#endif
 
 	FastLED.show();
 }
@@ -377,10 +361,7 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 
 			// Prepare colors for clock
 			mRing.displayClockPredefinedColor(color);
-			hRing.displayClockPredefinedColor(color);// Prepare colors
-
-			// Adjust brightness
-			FastLED.setBrightness(brightness);
+			hRing.displayClockPredefinedColor(color);
 			break;
 			
 		case 1:
@@ -400,11 +381,9 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 					break;
 			}
 
+			// Prepare colors for clock
 			mRing.displayClockVariableColor(color);
 			hRing.displayClockVariableColor(color);
-			
-			// Adjust brightness
-			FastLED.setBrightness(brightness);
 			break;
 
 		case 2:
@@ -434,17 +413,30 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 			// Prepare colors for clock
 			mRing.displayClockUserColor(clock_color);
 			hRing.displayClockUserColor(clock_color);
-
-			// Adjust brightness
-			FastLED.setBrightness(brightness);
 			break;
 	}
+
+#if USE_PHOTO_RESISTOR
+	// If it is night outside, turn the clock off so it doesn't distrub our user
+	if(photo_val > CLOCK_PHOTO_TRESHOLD){
+		FastLED.setBrightness(0);
+	}
+	else{
+		// Adjust brightness by users desire
+		FastLED.setBrightness(brightness);
+	}
+#else
+	// Adjust brightness by users desire
+	FastLED.setBrightness(brightness);
+#endif
 
 
 	// Disable special effects durring night
 	// So it doesn't wake up whole neighbour-hood 
-	if(photo_val > 100 && (t.hour > 8 && t.hour < 23))
+#if USE_PHOTO_RESISTOR
+	if(photo_val > CLOCK_PHOTO_TRESHOLD)
 	{
+#endif
 		// Every 15min display one fo the effects
 		if((t.min == 0) && (t.sec == 5))
 		{
@@ -468,14 +460,9 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 				CLOCK_DisplayFirework();
 			}
 		}
+#if USE_PHOTO_RESISTOR
 	}
-
-	// For testing purpose
-	#if DEBUG
-		if((t.sec == 5) || (t.sec == 35)){
-
-		}
-	#endif
+#endif
 }
 
 
@@ -642,6 +629,16 @@ void CLOCK_DisplayLamp(uint8_t val, uint8_t type){
 			}
 			break;
 	}
+
+	// I want to see the lamp even at night...
+	// You can automatically turn the LEDs brightness durring night off, if you like
+	/*
+	if(photo_val > CLOCK_PHOTO_TRESHOLD){
+		FastLED.setBrightness(0);
+	}
+	else{
+	*/
+	FastLED.setBrightness(START_BRIGHTNESS);
 }
 
 
@@ -655,6 +652,16 @@ void CLOCK_DisplayTemperature(void){
 	hRing.setBlack();
 	mRing.setBlack();
 
+	// I want to see the thermoneter even at night, so I know it is alive ...
+	// You can automatically turn the LEDs brightness durring night off, if you like
+	/*
+	if(photo_val > CLOCK_PHOTO_TRESHOLD){
+		FastLED.setBrightness(0);
+	}
+	else{
+	*/
+	FastLED.setBrightness(START_BRIGHTNESS);
+
 	// Display temperature on minute ring
 	if(temp < 18){
 		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(171,255,255), SHORTEST_HUES);
@@ -663,7 +670,6 @@ void CLOCK_DisplayTemperature(void){
 	else if(temp > 26){
 		fill_gradient(MinLeds, temp, CHSV(175,255,255), CHSV(0,255,255), LONGEST_HUES);
 		hRing.setAllHSV(0, 255, 255);
-
 	}
 	else{
 		switch(temp){
