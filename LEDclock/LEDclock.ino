@@ -4,41 +4,45 @@
  * 
  * Ver.:  8.1
  * Auth.: Grega Morano
- * Date.: 14.6.2020
+ * Date.: 22.6.2020
  * 
  * --------------------------------------------------------------------------------------------------
- * User can change modes of the clock with BTN 1, types with BTN 2
- * 4 Modes with different types:
- * 	- MODE 1: clock where user can define colors and brightness. User can circle through 
- * 	  different types with button 2 - for type. Values are changed with potenciometter. 
- * 			TYPE 1: Set brightness of the clock
- * 			TYPE 2: Set compas color
- * 			TYPE 3: Set minute indicator color
- * 			TYPE 4: Set hour indicator color
+ * User can change modes of the clock with BTN 1 (left), types with BTN 2 (right)
+ * 5 Modes with different types:
  * 
- * - MODE 2: Display clock with indicator for seconds. Here colors are predefined, but user can change
- * 	 all of them together. It can be done same as before, with BNT2 for type in circular order. Values 
- *   are changed with potenciometter. 
- * 			TYPE 1: Set brightness of the clock
- * 			TYPE 2: Set color of the clock
+ * - MODE 1: Display clock with indicator for seconds and milli seconds. Here colors are predefined, 
+ *   and user can change all of them together.User can circle through different types with BNT2. 
+ *   Values  are changed with potenciometter. 
+ * 			TYPE 1: Set color of the clock
+ * 			TYPE 2: Set brightness of the clock
+ * 	
+ * - MODE 2: Display clock with indicator for seconds. Transition between color is smooth. It can be
+ *   done same as before, with BNT2 for type in circular order. Values are changed with potenciometter. 
+ * 			TYPE 1: Set color of the clock
+ * 			TYPE 2: Set brightness of the clock
+ *       
+ * - MODE 3: clock where user can define all colors and brightness. User can circle through 
+ *    different types with button 2 - for type. Values are changed with potenciometter. 
+ *      	TYPE 1: Set compas color
+ *      	TYPE 2: Set minute indicator color
+ *      	TYPE 3: Set hour indicator color
+ *      	TYPE 4: Set brightness of the clock
  * 
- * - MODE 3: Some colors with LED-S
+ * - MODE 3: Some nice color effects with LED-S
  * 			TYPE 1: Rainbow circling around - user can change its speed with pot.
  * 			TYPE 2: Sinelon back and forward - user can change its color with pot.
  * 			TYPE 3: Chasing dots - user can just observe dots chasing each other.
- * 			TYPE 4: Fireworks - user must observe all 3 rockets - it can't be changed, but it will
- * 					automatically shifted back to rainbow (type 1) after 3 rockets.
+ * 			TYPE 4: Fireworks - user must observe rocket till the end - it can't be changed, but it will
+ * 					automatically shifted back to rainbow (type 1) after 1 rocket.
  * 
  * - MODE 4: Thermometer 
+ * 			Count the dots to see what is the temperature in the room 
  * 
  * If both buttons are pressed at the same time, user can change the time of the clock
  * If both buttons are pressed before startup, clock will go in the mantainance mode - it will display
  * compas (for mounting purpose) and later all effect between hours (demonstration purpose)
  *-----------------------------------------------------------------------------------------------------*/
 
-
-
-// TODO: testjrej BD show zdej ku si spremenu ku nej vč for zanke...tudi mantainance mode je zdej drgačn
 // TODO: Fix compiler warnings
 
 /* ----------------------------------------------------------------------------------------------------*/
