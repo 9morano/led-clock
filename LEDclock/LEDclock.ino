@@ -323,13 +323,17 @@ void CLOCK_FadeToBlack(void)
 
 
 /* ----------------------------------------------------------------------------------------------------*/
-// MODE 0: Predefined colors - with milliseconds
+// MODE 0: Color changes automatically - with seconds
 // MODE 1: Variable colors -  with seconds
 // MODE 2: User colors - without seconds
 void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 {
 
 	static int color = 0;
+	
+	static uint8_t staticColor = 0;
+	static int prevTime = 0;
+
 	static int brightness = START_BRIGHTNESS;
 	bool h12 = false;
 	myTime t;
@@ -347,14 +351,11 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 
 	switch(mode){
 		case 0:
-			// Toggle between Color and Brightness settings - depends on BTN2
+			// Buttons don't have any function - just change the brightness
 			switch(type){
 				case 0:
-				case 2:
-					color = val;
-					break;
-				
 				case 1:
+				case 2:
 				case 3:
 					brightness = val;
 					break;
@@ -363,9 +364,19 @@ void CLOCK_DisplayTime(uint8_t mode, uint8_t val, uint8_t type)
 					break;
 			}
 
+			// Every 1 min increase hue by 1
+			if (t.min != prevTime){
+				prevTime = t.min;
+
+				staticColor++;
+				if (staticColor >= 255){
+					staticColor = 0;
+				}
+			}
+
 			// Prepare colors for clock
-			mRing.displayClockPredefinedColor(color);
-			hRing.displayClockPredefinedColor(color);
+			mRing.displayClockVariableColor(staticColor);
+			hRing.displayClockVariableColor(staticColor);
 			break;
 			
 		case 1:
