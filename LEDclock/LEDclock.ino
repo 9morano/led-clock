@@ -124,12 +124,15 @@ void setup() {
 	// Configure clock module
 	Clock.setClockMode(true);  // set to 12h format
 
+	// Un-comment the following to set the time to defined value
+	/*
 	Clock.setYear(2020);
 	Clock.setMonth(6);
 	Clock.setDate(1);
 	Clock.setHour(CLOCK_DEFAULT_HOUR);
 	Clock.setMinute(CLOCK_DEFAULT_MIN);
 	Clock.setSecond(CLOCK_DEFAULT_SEC);
+	*/
 
 	// Set initial values of the user clock color
 	clock_color.compas = 255;
